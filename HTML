@@ -1,310 +1,336 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-full bg-slate-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exclusif — Espace VIP</title>
+    <title>RESTEV - Chasse aux Risques VR</title>
+    
+    <!-- A-Frame VR Framework -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.js">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        .blur-media { filter: blur(24px); transform: scale(1.08); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        /* Glassmorphic Panel Styling */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Pulse glow for target indicators */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.15); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Custom Scrollbar for Modals */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(13, 148, 136, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(13, 148, 136, 0.8);
+        }
+
+        /* Hide A-Frame default VR button since we manage a custom UI */
+        .a-enter-vr {
+            bottom: 20px !important;
+            right: 20px !important;
+            z-index: 40 !important;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex justify-center selection:bg-rose-500 selection:text-white">
+<body class="h-full text-slate-100 flex flex-col justify-between select-none bg-slate-950">
 
-    <!-- Modal d'Avertissement Majeur (+18) -->
-    <div id="age-modal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full text-center space-y-4 shadow-2xl">
-            <div class="w-14 h-14 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black text-white shadow-lg shadow-rose-500/30">18+</div>
-            <h2 class="text-xl font-bold">Contenu Réservé aux Majeurs</h2>
-            <p class="text-slate-400 text-sm">Ce profil contient des médias exclusifs pour adultes. Veuillez confirmer votre majorité.</p>
-            <div class="space-y-2 pt-2">
-                <button onclick="acceptAge()" class="w-full bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-rose-600/30">J'ai 18 ans ou plus</button>
-                <button onclick="window.location.href='https://www.google.com'" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl transition text-sm">Quitter</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Application Mobile Centrée -->
-    <div class="w-full max-w-md bg-slate-900 border-x border-slate-800 min-h-screen flex flex-col relative pb-20">
-        
-        <!-- En-tête Fixe -->
-        <header class="p-4 border-b border-slate-800/80 flex justify-between items-center sticky top-0 bg-slate-900/90 backdrop-blur-md z-40">
-            <div class="flex items-center gap-2">
-                <div class="relative">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 p-0.5">
-                        <img src="https://picsum.photos/id/64/150/150" alt="Avatar" class="w-full h-full object-cover rounded-full">
-                    </div>
-                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+    <!-- TOP HUD OVERLAY -->
+    <header class="fixed top-0 left-0 right-0 z-30 p-3 sm:p-4 pointer-events-none">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            
+            <!-- Brand & Logo -->
+            <div class="pointer-events-auto flex items-center gap-3 glass-panel px-4 py-2.5 rounded-2xl shadow-xl">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg">
+                    R
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-base leading-tight tracking-wide text-white">VIP Exclusive</h1>
-                    <p class="text-[11px] text-emerald-400 font-medium">● En ligne maintenant</p>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-wide text-white leading-tight">
+                        RESTEV <span class="text-teal-400 font-normal">| Santé au Travail</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Chasse aux Risques en Atelier 3D/VR</p>
                 </div>
             </div>
-            <button onclick="openTipModal()" class="bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-black text-xs px-3.5 py-2 rounded-full shadow-lg shadow-amber-500/20 hover:scale-105 transition active:scale-95">
-                ☕ Envoyer un Tip
-            </button>
-        </header>
 
-        <!-- Zone de Contenu Déroulant -->
-        <main class="space-y-5 flex-1 p-4">
-
-            <!-- Carrousel de Stories (Teasers rapides) -->
-            <section>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">Stories exclusives</h3>
-                <div class="flex gap-3 overflow-x-auto no-scrollbar py-1">
-                    <div onclick="viewStory('Lendemain de soirée... 🤫')" class="flex-shrink-0 text-center space-y-1 cursor-pointer group">
-                        <div class="w-16 h-16 rounded-2xl p-0.5 bg-gradient-to-tr from-rose-500 to-amber-500 group-hover:scale-105 transition">
-                            <img src="https://picsum.photos/id/1025/200/200" class="w-full h-full object-cover rounded-[14px]">
-                        </div>
-                        <span class="text-[11px] text-slate-300 font-medium block">Matin ☕</span>
-                    </div>
-                    <div onclick="viewStory('Nouveau costume reçu 🎁')" class="flex-shrink-0 text-center space-y-1 cursor-pointer group">
-                        <div class="w-16 h-16 rounded-2xl p-0.5 bg-gradient-to-tr from-rose-500 to-amber-500 group-hover:scale-105 transition">
-                            <img src="https://picsum.photos/id/338/200/200" class="w-full h-full object-cover rounded-[14px]">
-                        </div>
-                        <span class="text-[11px] text-slate-300 font-medium block">Essayage 🔥</span>
-                    </div>
-                    <div onclick="viewStory('Preview de la vidéo de ce soir')" class="flex-shrink-0 text-center space-y-1 cursor-pointer group">
-                        <div class="w-16 h-16 rounded-2xl p-0.5 bg-gradient-to-tr from-rose-500 to-amber-500 group-hover:scale-105 transition">
-                            <img src="https://picsum.photos/id/64/200/200" class="w-full h-full object-cover rounded-[14px]">
-                        </div>
-                        <span class="text-[11px] text-slate-300 font-medium block">Backstage 📹</span>
+            <!-- Game Stats & HUD Indicators -->
+            <div class="pointer-events-auto flex items-center gap-2 sm:gap-4 glass-panel px-4 py-2.5 rounded-2xl shadow-xl">
+                <!-- Score Counter -->
+                <div class="flex items-center gap-2 border-r border-slate-700/80 pr-3 sm:pr-4">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base sm:text-lg"></i>
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block leading-none">Risques</span>
+                        <span id="score-text" class="text-base sm:text-lg font-black text-white">0 / 5</span>
                     </div>
                 </div>
-            </section>
 
-            <!-- Filtres par Catégorie -->
-            <nav class="flex gap-2 border-b border-slate-800/80 pb-3 overflow-x-auto no-scrollbar">
-                <button onclick="filterFeed('all')" id="tab-all" class="bg-rose-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition">Tout (3)</button>
-                <button onclick="filterFeed('video')" id="tab-video" class="bg-slate-800 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl transition hover:text-white">📹 Vidéos</button>
-                <button onclick="filterFeed('image')" id="tab-image" class="bg-slate-800 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl transition hover:text-white">📷 Photos</button>
-            </nav>
-
-            <!-- Flux Principal -->
-            <div id="feed-container" class="space-y-6"></div>
-
-        </main>
-
-    </div>
-
-    <!-- Modal de Paiement / Déblocage -->
-    <div id="payment-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6 space-y-5">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-lg">Débloquer le contenu</h3>
-                <button onclick="closePaymentModal()" class="text-slate-500 hover:text-slate-300 text-xl">✕</button>
+                <!-- Timer -->
+                <div class="flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-teal-400 text-base sm:text-lg"></i>
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block leading-none">Temps</span>
+                        <span id="timer-text" class="text-base sm:text-lg font-black font-mono text-teal-300">00:00</span>
+                    </div>
+                </div>
             </div>
-            <div class="text-center py-2 space-y-1">
-                <p class="text-xs text-slate-400">Montant de la transaction :</p>
-                <p id="modal-price" class="text-4xl font-black text-rose-500">0,00 €</p>
-                <p class="text-[11px] text-emerald-400 font-medium">✓ Accès illimité à vie après achat</p>
+
+            <!-- Control Buttons -->
+            <div class="pointer-events-auto flex items-center gap-2">
+                <button id="btn-sound" onclick="toggleAudio()" class="glass-panel hover:bg-slate-800 text-slate-200 w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-lg" title="Activer/Désactiver le son">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-teal-400"></i>
+                </button>
+                <button onclick="showHelpModal()" class="glass-panel hover:bg-slate-800 text-slate-200 w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-lg" title="Aide & Commandes">
+                    <i class="fa-solid fa-circle-question text-teal-400"></i>
+                </button>
+                <button onclick="resetSimulation()" class="glass-panel hover:bg-slate-800 text-slate-200 w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-lg" title="Réinitialiser">
+                    <i class="fa-solid fa-rotate-right text-slate-300"></i>
+                </button>
             </div>
-            <button onclick="processPayment()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-emerald-600/20">
-                Payer de manière sécurisée
+
+        </div>
+    </header>
+
+    <!-- WELCOME MODAL -->
+    <div id="modal-welcome" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300">
+        <div class="glass-panel max-w-xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-700/60 relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-2xl font-bold">
+                    <i class="fa-solid fa-vr-cardboard"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-teal-400">Module de Prévention RESTEV</span>
+                    <h2 class="text-2xl font-black text-white">Chasse aux Risques en Atelier</h2>
+                </div>
+            </div>
+
+            <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
+                Bienvenue dans cette simulation immersive de sécurité au travail. Votre mission est de repérer et corriger <strong class="text-teal-300">5 situations dangereuses</strong> dissimulées dans l'atelier industriel avant la fin du temps.
+            </p>
+
+            <div class="space-y-3 mb-8">
+                <div class="glass-card p-3.5 rounded-xl flex items-start gap-3">
+                    <i class="fa-solid fa-computer-mouse text-teal-400 mt-1"></i>
+                    <div class="text-xs sm:text-sm text-slate-300">
+                        <strong class="text-white block">Sur Ordinateur / Mobile :</strong>
+                        Déplacez-vous avec les touches <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-600 font-mono text-slate-200">ZQSD</kbd> ou les flèches, orientez le regard à la souris/toucher et cliquez sur les anomalies.
+                    </div>
+                </div>
+                <div class="glass-card p-3.5 rounded-xl flex items-start gap-3">
+                    <i class="fa-solid fa-headset text-teal-400 mt-1"></i>
+                    <div class="text-xs sm:text-sm text-slate-300">
+                        <strong class="text-white block">En Casque VR (Meta Quest, etc.) :</strong>
+                        Cliquez sur le bouton <span class="text-teal-300 font-semibold">"VR"</span> en bas à droite pour entrer en immersion totale. Utilisez la gâchette des manettes pour pointer et sélectionner.
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startSimulation()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-extrabold text-base tracking-wide shadow-lg shadow-teal-500/25 transition-all duration-200 transform active:scale-98 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i> Démarrer l'Inspection
             </button>
         </div>
     </div>
 
-    <!-- Modal Pourboire (Tip) -->
-    <div id="tip-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6 space-y-5">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-lg">Envoyer un Pourboire ☕</h3>
-                <button onclick="closeTipModal()" class="text-slate-500 hover:text-slate-300 text-xl">✕</button>
+    <!-- HAZARD DETAIL MODAL -->
+    <div id="modal-hazard" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
+        <div class="glass-panel max-w-2xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-700/60 relative max-h-[90vh] flex flex-col justify-between">
+            
+            <div class="overflow-y-auto pr-2">
+                <!-- Header badge -->
+                <div class="flex items-center justify-between mb-4">
+                    <span id="hazard-category-badge" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        Risque Détecté
+                    </span>
+                    <span id="hazard-step-text" class="text-xs font-bold text-slate-400">1 / 5 Identifié</span>
+                </div>
+
+                <h3 id="hazard-title" class="text-xl sm:text-2xl font-black text-white mb-3">Titre du Risque</h3>
+                
+                <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 mb-5">
+                    <h4 class="text-xs uppercase font-bold text-slate-400 tracking-wider mb-1">Constat sur le terrain</h4>
+                    <p id="hazard-description" class="text-slate-200 text-sm sm:text-base leading-relaxed">Description détaillée du problème constaté...</p>
+                </div>
+
+                <!-- Regulatory & RESTEV Recommendations -->
+                <div class="space-y-4 mb-6">
+                    <div class="border-l-4 border-amber-500 pl-4 py-1">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">Cadre Réglementaire (Code du Travail / INRS)</h4>
+                        <p id="hazard-regulation" class="text-xs sm:text-sm text-slate-300 mt-1">Référence légale ou norme associée.</p>
+                    </div>
+
+                    <div class="border-l-4 border-teal-500 pl-4 py-1">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-teal-400">Préconisation & Action RESTEV</h4>
+                        <p id="hazard-prevention" class="text-xs sm:text-sm text-slate-300 mt-1">Actions correctives prioritaires à mettre en œuvre.</p>
+                    </div>
+                </div>
             </div>
-            <p class="text-xs text-slate-400">Soutenez la création de contenu personnalisé.</p>
-            <div class="grid grid-cols-3 gap-3">
-                <button onclick="sendTip(5)" class="bg-slate-800 hover:bg-rose-600/20 border border-slate-700 hover:border-rose-500 font-bold py-3 rounded-xl transition text-rose-400">5 €</button>
-                <button onclick="sendTip(10)" class="bg-slate-800 hover:bg-rose-600/20 border border-slate-700 hover:border-rose-500 font-bold py-3 rounded-xl transition text-rose-400">10 €</button>
-                <button onclick="sendTip(20)" class="bg-slate-800 hover:bg-rose-600/20 border border-slate-700 hover:border-rose-500 font-bold py-3 rounded-xl transition text-rose-400">20 €</button>
+
+            <!-- Modal Action Footer -->
+            <div class="pt-4 border-t border-slate-800/80 flex items-center justify-end">
+                <button onclick="closeHazardModal()" class="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-bold text-sm tracking-wide shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
+                    Compris, Continuer <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <script>
-        const postsData = [
-            {
-                id: "post_1",
-                title: "Teaser Vidéo — Douche Privée 🚿",
-                price: 9.99,
-                type: "video",
-                likes: 142,
-                teaserVideo: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                fullImg: "https://picsum.photos/id/1025/800/800",
-                unlocked: false
-            },
-            {
-                id: "post_2",
-                title: "Set Lingerie Dentelle Rouge 💋",
-                price: 4.99,
-                type: "image",
-                likes: 89,
-                teaserImg: "https://picsum.photos/id/64/600/600",
-                fullImg: "https://picsum.photos/id/64/1200/1200",
-                unlocked: false
-            },
-            {
-                id: "post_3",
-                title: "Shooting Photo Plage Sauvage 🌊",
-                price: 6.99,
-                type: "image",
-                likes: 215,
-                teaserImg: "https://picsum.photos/id/338/600/600",
-                fullImg: "https://picsum.photos/id/338/1200/1200",
-                unlocked: false
-            }
-        ];
+    <!-- VICTORY MODAL -->
+    <div id="modal-victory" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-lg hidden transition-all duration-300">
+        <div class="glass-panel max-w-xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-emerald-500/40 text-center relative overflow-hidden">
+            <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-        let selectedPostId = null;
+            <div class="w-20 h-20 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-4xl mx-auto mb-4 border border-emerald-500/40 shadow-inner">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (localStorage.getItem("age_confirmed") === "true") {
-                document.getElementById("age-modal").classList.add("hidden");
-            }
-            loadPurchases();
-            renderFeed('all');
-        });
+            <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Félicitations !</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-white mt-1 mb-2">Inspection Terminée avec Succès</h2>
+            <p class="text-slate-300 text-sm mb-6">Vous avez identifié l'ensemble des 5 risques critiques de l'atelier RESTEV.</p>
 
-        function acceptAge() {
-            localStorage.setItem("age_confirmed", "true");
-            document.getElementById("age-modal").classList.add("hidden");
-        }
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="glass-card p-4 rounded-2xl">
+                    <span class="text-xs text-slate-400 font-semibold block uppercase">Risques Résolus</span>
+                    <span class="text-2xl font-black text-emerald-400">5 / 5</span>
+                </div>
+                <div class="glass-card p-4 rounded-2xl">
+                    <span class="text-xs text-slate-400 font-semibold block uppercase">Temps Effectué</span>
+                    <span id="final-time" class="text-2xl font-black text-teal-300 font-mono">00:00</span>
+                </div>
+            </div>
 
-        function loadPurchases() {
-            const purchases = JSON.parse(localStorage.getItem("purchased_posts") || "[]");
-            postsData.forEach(post => {
-                if (purchases.includes(post.id)) post.unlocked = true;
-            });
-        }
+            <div class="p-4 bg-teal-950/40 rounded-2xl border border-teal-800/50 text-left mb-6">
+                <div class="flex items-center gap-2 text-teal-300 font-bold text-sm mb-1">
+                    <i class="fa-solid fa-shield-heart"></i> Engagement RESTEV
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Un atelier sécurisé repose sur la vigilance de chacun. Transmettez ces réflexes dans vos équipes et faites appel aux préventeurs RESTEV pour vos évaluations de risques (DUERP).
+                </p>
+            </div>
 
-        function renderFeed(filter = 'all') {
-            const container = document.getElementById("feed-container");
-            container.innerHTML = "";
+            <button onclick="resetSimulation()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-base tracking-wide shadow-lg shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> Recommencer une Session
+            </button>
+        </div>
+    </div>
 
-            const filteredPosts = postsData.filter(post => filter === 'all' || post.type === filter);
+    <!-- HELP MODAL -->
+    <div id="modal-help" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
+        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl shadow-2xl border border-slate-700/60">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-teal-400"></i> Instructions & Navigation
+                </h3>
+                <button onclick="closeHelpModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
 
-            filteredPosts.forEach(post => {
-                const card = document.createElement("article");
-                card.className = "bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl space-y-3 p-3.5";
+            <div class="space-y-3 text-sm text-slate-300 mb-6">
+                <p><strong class="text-white">But du jeu :</strong> Parcourez l'atelier et trouvez les 5 dangers matérialisés ou anormaux.</p>
+                <div class="p-3 bg-slate-900 rounded-xl space-y-2 text-xs">
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Déplacement clavier :</span> <span class="font-mono text-teal-300">Z, Q, S, D ou Flèches</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Sauter / Monter :</span> <span class="font-mono text-teal-300">Barre d'espace</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Orientation caméra :</span> <span class="font-mono text-teal-300">Glisser la souris</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400">Interagir avec un risque :</span> <span class="font-mono text-teal-300">Clic gauche / Pointer VR</span></div>
+                </div>
+            </div>
 
-                let headerHTML = `
-                    <div class="flex items-center justify-between px-1">
-                        <h4 class="font-bold text-slate-100 text-sm">${post.title}</h4>
-                        <span class="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-full font-bold">
-                            ${post.type === 'video' ? '📹 Vidéo HD' : '📷 Photo HD'}
-                        </span>
-                    </div>
-                `;
+            <button onclick="closeHelpModal()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition">
+                Fermer
+            </button>
+        </div>
+    </div>
 
-                let mediaHTML = '';
+    <!-- 3D A-FRAME VR SCENE -->
+    <div id="canvas-container" class="w-full h-full absolute inset-0 z-10">
+        <a-scene embedded style="width: 100%; height: 100%;" cursor="rayOrigin: mouse" raycaster="objects: .clickable" vr-mode-ui="enabled: true">
+            
+            <!-- Assets Management -->
+            <a-assets>
+                <!-- Generated visual textures/colors -->
+            </a-assets>
 
-                if (post.unlocked) {
-                    mediaHTML = `
-                        <div class="relative aspect-square bg-slate-950 rounded-xl overflow-hidden border border-emerald-500/30">
-                            <img src="${post.fullImg}" alt="Contenu complet" class="w-full h-full object-cover">
-                            <div class="absolute top-3 right-3 bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded-full shadow-lg">
-                                ✓ Débloqué
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    let teaserElement = post.type === 'video' 
-                        ? `<video src="${post.teaserVideo}" autoplay loop muted playsinline class="w-full h-full object-cover opacity-50"></video>`
-                        : `<img src="${post.teaserImg}" alt="Aperçu" class="w-full h-full object-cover blur-media opacity-80">`;
+            <!-- CAMERA & CONTROLLERS -->
+            <a-entity id="rig" position="0 0 7" movement-controls="speed: 0.2">
+                <!-- Camera -->
+                <a-camera id="camera" position="0 1.6 0" look-controls="pointerLockEnabled: false">
+                    <!-- Cursor for gaze/desktop click feedback -->
+                    <a-cursor id="cursor"
+                        geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+                        material="color: #14b8a6; shader: flat"
+                        position="0 0 -1"
+                        raycaster="objects: .clickable">
+                    </a-cursor>
+                </a-camera>
 
-                    mediaHTML = `
-                        <div class="relative aspect-square bg-slate-950 rounded-xl overflow-hidden">
-                            ${teaserElement}
-                            <div class="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center">
-                                <div class="w-12 h-12 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center text-xl mb-2 shadow-inner">🔒</div>
-                                <p class="text-xs text-slate-300 font-medium mb-3">Accès exclusif sans censure</p>
-                                <button onclick="openPaymentModal('${post.id}')" class="bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-rose-600/30">
-                                    Débloquer pour ${post.price.toFixed(2).replace('.', ',')} €
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
+                <!-- VR Controllers with Raycasters -->
+                <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 10" line="color: #14b8a6; opacity: 0.8"></a-entity>
+                <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 10" line="color: #14b8a6; opacity: 0.8"></a-entity>
+            </a-entity>
 
-                let footerHTML = `
-                    <div class="flex items-center justify-between px-1 text-xs text-slate-400 pt-1">
-                        <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 hover:text-rose-500 transition">
-                            <span id="like-icon-${post.id}">❤️</span>
-                            <span id="like-count-${post.id}" class="font-semibold">${post.likes}</span>
-                        </button>
-                        <span class="text-[11px] text-slate-500">Contenu Privé</span>
-                    </div>
-                `;
+            <!-- ENVIRONMENT LIGHTING -->
+            <a-ambient-light color="#8899ac" intensity="0.65"></a-ambient-light>
+            <a-directional-light color="#ffffff" intensity="0.8" position="-5 10 5" cast-shadow="true"></a-directional-light>
+            <a-point-light color="#14b8a6" intensity="0.4" position="0 4 0"></a-point-light>
 
-                card.innerHTML = headerHTML + mediaHTML + footerHTML;
-                container.appendChild(card);
-            });
-        }
+            <!-- WORKSHOP ROOM STRUCTURE -->
+            <!-- Floor -->
+            <a-plane position="0 0 0" rotation="-90 0 0" width="24" height="20" color="#334155" roughness="0.8"></a-plane>
+            
+            <!-- Floor Safety Walkway Lines (Yellow) -->
+            <a-plane position="0 0.01 0" rotation="-90 0 0" width="0.2" height="18" color="#f59e0b"></a-plane>
+            <a-plane position="-4 0.01 0" rotation="-90 0 0" width="0.2" height="18" color="#f59e0b"></a-plane>
 
-        function filterFeed(type) {
-            ['all', 'video', 'image'].forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                if (t === type) {
-                    btn.className = "bg-rose-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition";
-                } else {
-                    btn.className = "bg-slate-800 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl transition hover:text-white";
-                }
-            });
-            renderFeed(type);
-        }
+            <!-- Back Wall -->
+            <a-plane position="0 4 -10" rotation="0 0 0" width="24" height="8" color="#1e293b"></a-plane>
+            <!-- Front Wall -->
+            <a-plane position="0 4 10" rotation="0 180 0" width="24" height="8" color="#1e293b"></a-plane>
+            <!-- Left Wall -->
+            <a-plane position="-12 4 0" rotation="0 90 0" width="20" height="8" color="#1e293b"></a-plane>
+            <!-- Right Wall -->
+            <a-plane position="12 4 0" rotation="0 -90 0" width="20" height="8" color="#1e293b"></a-plane>
+            <!-- Ceiling -->
+            <a-plane position="0 8 0" rotation="90 0 0" width="24" height="20" color="#0f172a"></a-plane>
 
-        function toggleLike(postId) {
-            const post = postsData.find(p => p.id === postId);
-            if (!post) return;
-            post.likes++;
-            document.getElementById(`like-count-${postId}`).innerText = post.likes;
-        }
-
-        function viewStory(title) {
-            alert(`Story : ${title}`);
-        }
-
-        function openTipModal() {
-            document.getElementById("tip-modal").classList.remove("hidden");
-        }
-
-        function closeTipModal() {
-            document.getElementById("tip-modal").classList.add("hidden");
-        }
-
-        function sendTip(amount) {
-            closeTipModal();
-            alert(`Merci pour votre pourboire de ${amount} € ! 💖`);
-        }
-
-        function openPaymentModal(postId) {
-            const post = postsData.find(p => p.id === postId);
-            if (!post) return;
-            selectedPostId = postId;
-            document.getElementById("modal-price").innerText = `${post.price.toFixed(2).replace('.', ',')} €`;
-            document.getElementById("payment-modal").classList.remove("hidden");
-        }
-
-        function closePaymentModal() {
-            document.getElementById("payment-modal").classList.add("hidden");
-            selectedPostId = null;
-        }
-
-        function processPayment() {
-            if (!selectedPostId) return;
-            const purchases = JSON.parse(localStorage.getItem("purchased_posts") || "[]");
-            if (!purchases.includes(selectedPostId)) {
-                purchases.push(selectedPostId);
-                localStorage.setItem("purchased_posts", JSON.stringify(purchases));
-            }
-            const post = postsData.find(p => p.id === selectedPostId);
-            if (post) post.unlocked = true;
-            closePaymentModal();
-            renderFeed();
-        }
-    </script>
-</body>
-</html>
+            <!-- Ceiling Beams -->
+            <a-box position="0 
