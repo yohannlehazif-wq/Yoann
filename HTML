@@ -333,4 +333,429 @@
             <a-plane position="0 8 0" rotation="90 0 0" width="24" height="20" color="#0f172a"></a-plane>
 
             <!-- Ceiling Beams -->
-            <a-box position="0 
+            <a-box position="0 7.8 -5" width="24" height="0.4" depth="0.4" color="#0284c7"></a-box>
+            <a-box position="0 7.8 0" width="24" height="0.4" depth="0.4" color="#0284c7"></a-box>
+            <a-box position="0 7.8 5" width="24" height="0.4" depth="0.4" color="#0284c7"></a-box>
+
+            <!-- Safety Poster on Wall -->
+            <a-plane position="-7 4.5 -9.9" width="3" height="2" color="#0f172a">
+                <a-text value="RESTEV - SANTE AU TRAVAIL\nConsignes de Securite Atelier\n1. Port des EPI obligatoire\n2. Garder les voies degagees\n3. Signaler tout produit chimique" align="center" color="#ffffff" width="4.5" position="0 0 0.02"></a-text>
+            </a-plane>
+
+            <!-- WORKSHOP FURNITURE & PROPS -->
+
+            <!-- Main Workbench 1 (Center Right) -->
+            <a-entity id="workbench-1" position="5 0 -2">
+                <!-- Tabletop -->
+                <a-box position="0 1 0" width="3.5" height="0.15" depth="1.5" color="#475569"></a-box>
+                <!-- Legs -->
+                <a-box position="-1.6 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <a-box position="1.6 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <a-box position="-1.6 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <a-box position="1.6 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <!-- Tool Box on Table -->
+                <a-box position="1 1.25 -0.2" width="0.8" height="0.35" depth="0.4" color="#dc2626"></a-box>
+            </a-entity>
+
+            <!-- Secondary Workbench 2 (Left) -->
+            <a-entity id="workbench-2" position="-6 0 -4">
+                <a-box position="0 1 0" width="3" height="0.15" depth="1.4" color="#475569"></a-box>
+                <a-box position="-1.4 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <a-box position="1.4 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <a-box position="-1.4 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+                <a-box position="1.4 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
+            </a-entity>
+
+            <!-- Industrial Machine / Lathe Structure (Center Back) -->
+            <a-entity id="heavy-machine" position="0 0 -7">
+                <a-box position="0 1.2 0" width="4" height="2.4" depth="1.8" color="#334155"></a-box>
+                <a-box position="0 2.5 0" width="3.6" height="0.3" depth="1.4" color="#0284c7"></a-box>
+                <!-- Control Panel -->
+                <a-box position="1.2 1.6 0.95" width="0.8" height="0.9" depth="0.1" color="#0f172a"></a-box>
+                <a-cylinder position="1.4 1.8 1.02" radius="0.08" height="0.05" rotation="90 0 0" color="#ef4444"></a-cylinder>
+                <a-cylinder position="1.0 1.8 1.02" radius="0.06" height="0.05" rotation="90 0 0" color="#22c55e"></a-cylinder>
+            </a-entity>
+
+            <!-- Storage Racks (Right Wall) -->
+            <a-entity position="11 0 -2" rotation="0 -90 0">
+                <a-box position="0 2 0" width="4" height="0.1" depth="1.2" color="#64748b"></a-box>
+                <a-box position="0 1 0" width="4" height="0.1" depth="1.2" color="#64748b"></a-box>
+                <a-box position="-1.9 1.5 0" width="0.1" height="3" depth="1.2" color="#334155"></a-box>
+                <a-box position="1.9 1.5 0" width="0.1" height="3" depth="1.2" color="#334155"></a-box>
+            </a-entity>
+
+
+            <!-- HAZARD 1: Unlabeled Chemical Drum (Right side) -->
+            <a-entity id="hazard-1" class="clickable" hazard-item="id: 1" position="8 0 -3">
+                <!-- Drum Mesh -->
+                <a-cylinder id="drum-mesh" position="0 0.9 0" radius="0.55" height="1.8" color="#ea580c" roughness="0.3">
+                    <a-ring position="0 0.5 0.56" radius-inner="0.15" radius-outer="0.25" color="#fef08a" rotation="0 0 0"></a-ring>
+                    <a-text value="?" position="0 0.5 0.58" align="center" color="#000" width="4"></a-text>
+                </a-cylinder>
+
+                <!-- Interactive Glow / Indicator Pulsing Halo -->
+                <a-ring id="halo-1" position="0 0.02 0" rotation="-90 0 0" radius-inner="0.7" radius-outer="0.9" color="#f59e0b" material="transparent: true; opacity: 0.7" class="animate-pulse-glow"></a-ring>
+                
+                <a-text id="label-1" value="PRODUIT SANS ETIQUETTE" position="0 2.1 0" align="center" color="#fbbf24" width="4" side="double"></a-text>
+            </a-entity>
+
+
+            <!-- HAZARD 2: Blocked Emergency Exit (Back Left Wall) -->
+            <a-entity id="hazard-2" class="clickable" hazard-item="id: 2" position="-10 0 -9.8">
+                <!-- Emergency Door Frame -->
+                <a-box position="0 2 0" width="2.2" height="4" depth="0.1" color="#15803d"></a-box>
+                <a-plane position="0 3.7 0.06" width="1.8" height="0.4" color="#22c55e">
+                    <a-text value="SORTIE D'URGENCE" align="center" color="#ffffff" width="3" position="0 0 0.01"></a-text>
+                </a-plane>
+
+                <!-- Blocking Pallets & Crates stacked in front -->
+                <a-entity id="blocking-crates" position="0 0 0.6">
+                    <a-box position="-0.3 0.4 0" width="1.2" height="0.8" depth="0.9" color="#b45309"></a-box>
+                    <a-box position="0.4 0.3 0.2" width="1.0" height="0.6" depth="0.8" color="#d97706"></a-box>
+                    <a-box position="0 0.9 0" width="1.0" height="0.6" depth="0.7" color="#78350f"></a-box>
+                </a-entity>
+
+                <!-- Pulsing Indicator -->
+                <a-ring id="halo-2" position="0 0.02 0.8" rotation="-90 0 0" radius-inner="1.0" radius-outer="1.2" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
+                <a-text id="label-2" value="SORTIE BLOMQUEE" position="0 2.5 0.8" align="center" color="#fbbf24" width="4" side="double"></a-text>
+            </a-entity>
+
+
+            <!-- HAZARD 3: Exposed Damaged Wire on Floor (Center Walkway) -->
+            <a-entity id="hazard-3" class="clickable" hazard-item="id: 3" position="-1 0 1">
+                <!-- Loose Cable running across path -->
+                <a-cylinder id="cable-mesh" position="0 0.03 0" radius="0.04" height="3" rotation="90 0 45" color="#0f172a"></a-cylinder>
+                <!-- Exposed Stripped Copper Spark Zone -->
+                <a-sphere id="spark-mesh" position="0 0.05 0" radius="0.12" color="#ef4444" material="emissive: #f97316; emissiveIntensity: 0.8"></a-sphere>
+
+                <!-- Pulsing Indicator -->
+                <a-ring id="halo-3" position="0 0.02 0" rotation="-90 0 0" radius-inner="0.5" radius-outer="0.7" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
+                <a-text id="label-3" value="CABLE ELECTRIQUE NUDE" position="0 0.8 0" align="center" color="#fbbf24" width="3.5" side="double"></a-text>
+            </a-entity>
+
+
+            <!-- HAZARD 4: Oil Spill Slick (Near Machine) -->
+            <a-entity id="hazard-4" class="clickable" hazard-item="id: 4" position="-2 0 -5">
+                <!-- Oil puddle mesh -->
+                <a-cylinder id="oil-mesh" position="0 0.01 0" radius="1.1" height="0.01" color="#020617" roughness="0.1" metalness="0.8"></a-cylinder>
+
+                <!-- Pulsing Indicator -->
+                <a-ring id="halo-4" position="0 0.02 0" rotation="-90 0 0" radius-inner="1.2" radius-outer="1.4" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
+                <a-text id="label-4" value="FLAQUE D'HUILE GLISSANTE" position="0 1.0 0" align="center" color="#fbbf24" width="3.5" side="double"></a-text>
+            </a-entity>
+
+
+            <!-- HAZARD 5: Unprotected Bench Grinder Machine (Workbench 2) -->
+            <a-entity id="hazard-5" class="clickable" hazard-item="id: 5" position="-6 1.08 -4">
+                <!-- Grinder Motor Base -->
+                <a-box position="0 0.2 0" width="0.6" height="0.3" depth="0.4" color="#1e293b"></a-box>
+                <!-- Grinding Wheels -->
+                <a-cylinder position="-0.35 0.25 0" radius="0.25" height="0.08" rotation="0 0 90" color="#64748b"></a-cylinder>
+                <a-cylinder id="grinder-wheel" position="0.35 0.25 0" radius="0.25" height="0.08" rotation="0 0 90" color="#ef4444"></a-cylinder>
+
+                <!-- Pulsing Indicator -->
+                <a-ring id="halo-5" position="0 0.6 0" rotation="0 0 0" radius-inner="0.4" radius-outer="0.5" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
+                <a-text id="label-5" value="MEULEUSE SANS PROTECTION" position="0 0.9 0" align="center" color="#fbbf24" width="3.5" side="double"></a-text>
+            </a-entity>
+
+        </a-scene>
+    </div>
+
+    <script>
+        /* State Management */
+        const state = {
+            started: false,
+            audioEnabled: true,
+            startTime: null,
+            timerInterval: null,
+            foundHazards: new Set(),
+            totalHazards: 5
+        };
+
+        /* Hazard Database - RESTEV Occupational Safety Content */
+        const hazardsData = {
+            1: {
+                title: "Bidon de Produit Chimique sans Étiquetage",
+                category: "Risque Chimique / FDS",
+                categoryClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+                description: "Un fût contenant un solvant ou produit toxique est déposé sans étiquette de danger CLP/SGH ni Fiche de Données de Sécurité (FDS) accessible.",
+                regulation: "Code du Travail - Art. R4412-127 : Tout récipient contenant un produit chimique dangereux doit porter une étiquette claire indiquant les risques et les précautions d'emploi.",
+                prevention: "Réétiqueter immédiatement le contenant avec les pictogrammes de danger réglementaires. Rendre la FDS accessible et former les opérateurs au port des EPI adaptés."
+            },
+            2: {
+                title: "Issue de Secours Encombrée par des Palettes",
+                category: "Risque d'Évacuation / Incendie",
+                categoryClass: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+                description: "La porte de sortie d'urgence est complètement obstruée par un stockage temporaire de cartons et de palettes en bois.",
+                regulation: "Code du Travail - Art. R4227-4 à R4227-14 : Les dégagements et voies d'évacuation doivent être maintenus libres de tout obstacle en permanence.",
+                prevention: "Dégager immédiatement l'accès à la porte. Matérialiser une zone d'interdiction de dépôt au sol (hachures jaunes et noires) de 1,20 m minimum."
+            },
+            3: {
+                title: "Câble Électrique Dénudé au Sol",
+                category: "Risque Électrique & Chute",
+                categoryClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+                description: "Un câble d'alimentation électrique détérioré traîne en travers de l'allée principale avec des conducteurs en cuivre apparents.",
+                regulation: "Code du Travail - Art. R4226-1 : Les installations électriques doivent être maintenues en bon état d'isolement et protégées contre les détériorations mécaniques.",
+                prevention: "Consigner/Mettre hors tension immédiatement l'équipement. Remplacer le cordon endommagé et installer un protège-câble de sol haute résistance."
+            },
+            4: {
+                title: "Flaque d'Huile Mécanique Non Signalée",
+                category: "Risque de Glissade / Chute de plein pied",
+                categoryClass: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+                description: "Une fuite de lubrifiant sous une machine crée une zone glissante importante directement sur la voie de passage des opérateurs.",
+                regulation: "INRS ED 6158 : Les chutes de plein pied représentent la 2ème cause d'accidents du travail. Le sol doit être propre, sec et sans obstacle.",
+                prevention: "Balisersur-le-champ la zone avec un cône de danger, appliquer un absorbant végétal ou minéral, puis réparer la fuite carter de la machine."
+            },
+            5: {
+                title: "Meuleuse d'Établi sans Écran de Protection ni EPI",
+                category: "Risque de Projection / Équipement de travail",
+                categoryClass: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+                description: "Le touret à meuler est utilisé sans son carter protecteur transparent et aucune paire de lunettes de sécurité n'est présente au poste.",
+                regulation: "Code du Travail - Art. R4324-1 et R4324-21 : Les éléments mobiles de travail présentant un risque de projection doivent être munis de protecteurs efficaces.",
+                prevention: "Fixer un écran pare-étincelles orientable en polycarbonate, régler le porte-pièce à 2 mm du disque et imposer le port obligatoire des lunettes/visière."
+            }
+        };
+
+        /* A-Frame Component for Hazard Interaction */
+        AFRAME.registerComponent('hazard-item', {
+            schema: { id: { type: 'int' } },
+            init: function () {
+                const el = this.el;
+                const hazardId = this.data.id;
+
+                // Mouse / Pointer Hover Feedback
+                el.addEventListener('mouseenter', () => {
+                    if (!state.foundHazards.has(hazardId)) {
+                        document.body.style.cursor = 'pointer';
+                    }
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    document.body.style.cursor = 'default';
+                });
+
+                // Click / Trigger Event
+                el.addEventListener('click', () => {
+                    handleHazardSelect(hazardId);
+                });
+            }
+        });
+
+        /* WEB AUDIO API - Synthesized Sound Effects (No External Sound Files) */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!state.audioEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'found') {
+                // Success Chime (Two-Tone)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'victory') {
+                // Fanfare chord sound
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.frequency.setValueAtTime(freq, now + i * 0.1);
+                    subGain.gain.setValueAtTime(0.2, now + i * 0.1);
+                    subGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.5);
+                    subOsc.start(now + i * 0.1);
+                    subOsc.stop(now + i * 0.1 + 0.5);
+                });
+            } else if (type === 'click') {
+                // UI click
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+        }
+
+        /* Start Simulation */
+        function startSimulation() {
+            playSound('click');
+            document.getElementById('modal-welcome').classList.add('hidden');
+            state.started = true;
+            state.startTime = Date.now();
+            
+            // Start Timer
+            state.timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        /* Timer Update Function */
+        function updateTimer() {
+            if (!state.startTime) return;
+            const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+            const timeStr = `${minutes}:${seconds}`;
+            
+            document.getElementById('timer-text').innerText = timeStr;
+            document.getElementById('final-time').innerText = timeStr;
+        }
+
+        /* Handle Hazard Click */
+        function handleHazardSelect(id) {
+            if (!state.started) return;
+
+            const isNew = !state.foundHazards.has(id);
+            state.foundHazards.add(id);
+
+            // Play Chime
+            playSound('found');
+
+            // Update 3D Visual State in Scene
+            solveHazardIn3D(id);
+
+            // Update Score HUD
+            document.getElementById('score-text').innerText = `${state.foundHazards.size} / ${state.totalHazards}`;
+
+            // Show Informational Modal
+            const data = hazardsData[id];
+            document.getElementById('hazard-category-badge').innerText = data.category;
+            document.getElementById('hazard-category-badge').className = `px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${data.categoryClass}`;
+            document.getElementById('hazard-step-text').innerText = `${state.foundHazards.size} / ${state.totalHazards} Identifié${state.foundHazards.size > 1 ? 's' : ''}`;
+            document.getElementById('hazard-title').innerText = data.title;
+            document.getElementById('hazard-description').innerText = data.description;
+            document.getElementById('hazard-regulation').innerText = data.regulation;
+            document.getElementById('hazard-prevention').innerText = data.prevention;
+
+            document.getElementById('modal-hazard').classList.remove('hidden');
+        }
+
+        /* Modify 3D Entities to show "Resolved" status */
+        function solveHazardIn3D(id) {
+            const halo = document.getElementById(`halo-${id}`);
+            const label = document.getElementById(`label-${id}`);
+
+            if (halo) {
+                halo.setAttribute('color', '#22c55e'); // Green color
+            }
+
+            if (label) {
+                label.setAttribute('color', '#4ade80');
+                label.setAttribute('value', 'RISQUE IDENTIFIE & CORRIGE');
+            }
+
+            // Visual adaptations per object
+            if (id === 1) { // Chemical drum
+                const drum = document.getElementById('drum-mesh');
+                drum.setAttribute('color', '#15803d'); // Safe Green
+            } else if (id === 2) { // Exit
+                const crates = document.getElementById('blocking-crates');
+                crates.setAttribute('position', '2 0 0.6'); // Move out of the way
+            } else if (id === 3) { // Electric cable
+                const spark = document.getElementById('spark-mesh');
+                spark.setAttribute('color', '#22c55e');
+            } else if (id === 4) { // Oil
+                const oil = document.getElementById('oil-mesh');
+                oil.setAttribute('color', '#15803d');
+            } else if (id === 5) { // Grinder
+                const wheel = document.getElementById('grinder-wheel');
+                wheel.setAttribute('color', '#15803d');
+            }
+        }
+
+        /* Close Hazard Modal */
+        function closeHazardModal() {
+            playSound('click');
+            document.getElementById('modal-hazard').classList.add('hidden');
+
+            // Check for Victory
+            if (state.foundHazards.size === state.totalHazards) {
+                setTimeout(triggerVictory, 400);
+            }
+        }
+
+        /* Trigger Victory Modal */
+        function triggerVictory() {
+            clearInterval(state.timerInterval);
+            playSound('victory');
+            document.getElementById('modal-victory').classList.remove('hidden');
+        }
+
+        /* Sound Toggle Function */
+        function toggleAudio() {
+            state.audioEnabled = !state.audioEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (state.audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-teal-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+            }
+        }
+
+        /* Show/Hide Help Modals */
+        function showHelpModal() {
+            playSound('click');
+            document.getElementById('modal-help').classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            playSound('click');
+            document.getElementById('modal-help').classList.add('hidden');
+        }
+
+        /* Reset Simulation */
+        function resetSimulation() {
+            playSound('click');
+            state.foundHazards.clear();
+            clearInterval(state.timerInterval);
+            state.startTime = Date.now();
+            
+            document.getElementById('score-text').innerText = `0 / ${state.totalHazards}`;
+            document.getElementById('timer-text').innerText = '00:00';
+            
+            document.getElementById('modal-victory').classList.add('hidden');
+            document.getElementById('modal-hazard').classList.add('hidden');
+            document.getElementById('modal-welcome').classList.remove('hidden');
+
+            // Reset 3D Hazard Visuals
+            for (let i = 1; i <= 5; i++) {
+                const halo = document.getElementById(`halo-${i}`);
+                const label = document.getElementById(`label-${i}`);
+                if (halo) halo.setAttribute('color', '#f59e0b');
+                if (label) label.setAttribute('color', '#fbbf24');
+            }
+
+            document.getElementById('label-1').setAttribute('value', 'PRODUIT SANS ETIQUETTE');
+            document.getElementById('drum-mesh').setAttribute('color', '#ea580c');
+
+            document.getElementById('label-2').setAttribute('value', 'SORTIE BLOQUEE');
+            document.getElementById('blocking-crates').setAttribute('position', '0 0 0.6');
+
+            document.getElementById('label-3').setAttribute('value', 'CABLE ELECTRIQUE NUDE');
+            document.getElementById('spark-mesh').setAttribute('color', '#ef4444');
+
+            document.getElementById('label-4').setAttribute('value', 'FLAQUE D\'HUILE GLISSANTE');
+            document.getElementById('oil-mesh').setAttribute('color', '#020617');
+
+            document.getElementById('label-5').setAttribute('value', 'MEULEUSE SANS PROTECTION');
+            document.getElementById('grinder-wheel').setAttribute('color', '#ef4444');
+
+            // Reset Camera Position
+            const rig = document.getElementById('rig');
+            rig.setAttribute('position', '0 0 7');
+        }
+    </script>
+</body>
+</html>
