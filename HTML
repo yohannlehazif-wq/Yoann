@@ -1,761 +1,950 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-900">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESTEV - Chasse aux Risques VR</title>
-    
-    <!-- A-Frame VR Framework -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.js">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            user-select: none;
-            overflow: hidden;
-        }
-
-        /* Glassmorphic Panel Styling */
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* Pulse glow for target indicators */
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.9; transform: scale(1.15); }
-        }
-
-        .animate-pulse-glow {
-            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        /* Custom Scrollbar for Modals */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(13, 148, 136, 0.5);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(13, 148, 136, 0.8);
-        }
-
-        /* Hide A-Frame default VR button since we manage a custom UI */
-        .a-enter-vr {
-            bottom: 20px !important;
-            right: 20px !important;
-            z-index: 40 !important;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Warehouse Hazard Perception — 360° Training Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js 3D Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-<body class="h-full text-slate-100 flex flex-col justify-between select-none bg-slate-950">
+<body>
 
-    <!-- TOP HUD OVERLAY -->
-    <header class="fixed top-0 left-0 right-0 z-30 p-3 sm:p-4 pointer-events-none">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
-            
-            <!-- Brand & Logo -->
-            <div class="pointer-events-auto flex items-center gap-3 glass-panel px-4 py-2.5 rounded-2xl shadow-xl">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg">
-                    R
-                </div>
-                <div>
-                    <h1 class="text-sm sm:text-base font-extrabold tracking-wide text-white leading-tight">
-                        RESTEV <span class="text-teal-400 font-normal">| Santé au Travail</span>
-                    </h1>
-                    <p class="text-xs text-slate-400 hidden sm:block">Chasse aux Risques en Atelier 3D/VR</p>
-                </div>
+  <!-- TOP GLOBAL NAVBAR -->
+  <header class="navbar">
+    <div class="nav-brand" id="nav-logo-link" style="cursor: pointer;">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">HAZARD HUNT 360°</span>
+        <span class="brand-sub">AUTOMOTIVE LOGISTICS SAFETY SIMULATOR</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <div id="user-badge" class="user-pill">
+        <span class="user-role role-guest">GUEST</span>
+        <div class="user-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="user-display-name" class="user-name">Not Logged In</span>
+        </div>
+      </div>
+
+      <button id="btn-sound-toggle" class="icon-btn" title="Toggle Sound FX">
+        <svg id="sound-icon-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <svg id="sound-icon-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      </button>
+
+      <button id="btn-nav-auth" class="nav-btn btn-amber">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign In / Register
+      </button>
+
+      <button id="btn-nav-dashboard" class="nav-btn btn-slate" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Player Portal
+      </button>
+
+      <button id="btn-nav-admin" class="nav-btn btn-admin" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Portal
+      </button>
+
+      <button id="btn-nav-logout" class="nav-btn btn-outline" style="display: none;">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <div class="app-container">
+
+    <!-- 1. LANDING / INTRO SCREEN WITH DISTINCT PLAYER & ADMIN PORTALS -->
+    <div id="screen-intro" class="screen active">
+      <div class="hero-card">
+        <div class="badge-tag yellow-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          University Enterprise Health & Safety Project
+        </div>
+        <h1 class="main-title">360° Warehouse Hazard Perception Simulator</h1>
+        <p class="subtitle">
+          Step into a virtual 3D automotive logistics warehouse. Look in every direction using mouse or touchpad, walk through high-bay aisles, spot developing workplace hazards before they cause injury, and complete safety quizzes (100 Max Score).
+        </p>
+
+        <!-- TWO DISTINCT DUAL-PORTAL CARDS -->
+        <h3 class="subsection-title" style="margin-bottom: 1rem; color: var(--accent-yellow);">Select Portal Entrance:</h3>
+        <div class="portal-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          
+          <!-- PLAYER PORTAL CARD -->
+          <div class="portal-card player-portal-card" style="background: rgba(30, 41, 59, 0.7); border: 2px solid var(--accent-yellow); border-radius: var(--radius-md); padding: 1.75rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="badge-tag yellow-tag" style="margin-bottom: 0.75rem;">🎮 PLAYER PORTAL</div>
+              <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem;">Trainee & Operator Portal</h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
+                For warehouse operators, trainees, and students. Take 360° hazard perception challenges, test your response time, answer easy safety quizzes, and build your 100-point training score certificate.
+              </p>
             </div>
+            <button id="btn-enter-player-portal" class="btn btn-primary btn-lg" style="width: 100%;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Enter Player Portal
+            </button>
+          </div>
 
-            <!-- Game Stats & HUD Indicators -->
-            <div class="pointer-events-auto flex items-center gap-2 sm:gap-4 glass-panel px-4 py-2.5 rounded-2xl shadow-xl">
-                <!-- Score Counter -->
-                <div class="flex items-center gap-2 border-r border-slate-700/80 pr-3 sm:pr-4">
-                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base sm:text-lg"></i>
-                    <div>
-                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block leading-none">Risques</span>
-                        <span id="score-text" class="text-base sm:text-lg font-black text-white">0 / 5</span>
-                    </div>
-                </div>
-
-                <!-- Timer -->
-                <div class="flex items-center gap-2">
-                    <i class="fa-regular fa-clock text-teal-400 text-base sm:text-lg"></i>
-                    <div>
-                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block leading-none">Temps</span>
-                        <span id="timer-text" class="text-base sm:text-lg font-black font-mono text-teal-300">00:00</span>
-                    </div>
-                </div>
+          <!-- ADMIN PORTAL CARD -->
+          <div class="portal-card admin-portal-card" style="background: rgba(30, 41, 59, 0.7); border: 2px solid var(--accent-purple); border-radius: var(--radius-md); padding: 1.75rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="badge-tag admin-tag" style="margin-bottom: 0.75rem;">🛡️ ADMIN PORTAL</div>
+              <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem;">Safety Instructor & Admin Portal</h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
+                For Health & Safety officers, instructors, and managers. Inspect real SQLite analytics, view class performance charts, track individual trainee logs, and manage scenarios & quizzes.
+              </p>
             </div>
-
-            <!-- Control Buttons -->
-            <div class="pointer-events-auto flex items-center gap-2">
-                <button id="btn-sound" onclick="toggleAudio()" class="glass-panel hover:bg-slate-800 text-slate-200 w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-lg" title="Activer/Désactiver le son">
-                    <i id="sound-icon" class="fa-solid fa-volume-high text-teal-400"></i>
-                </button>
-                <button onclick="showHelpModal()" class="glass-panel hover:bg-slate-800 text-slate-200 w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-lg" title="Aide & Commandes">
-                    <i class="fa-solid fa-circle-question text-teal-400"></i>
-                </button>
-                <button onclick="resetSimulation()" class="glass-panel hover:bg-slate-800 text-slate-200 w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-lg" title="Réinitialiser">
-                    <i class="fa-solid fa-rotate-right text-slate-300"></i>
-                </button>
-            </div>
+            <button id="btn-enter-admin-portal" class="btn btn-admin btn-lg" style="width: 100%;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Enter Admin Portal
+            </button>
+          </div>
 
         </div>
-    </header>
 
-    <!-- WELCOME MODAL -->
-    <div id="modal-welcome" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300">
-        <div class="glass-panel max-w-xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-700/60 relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-40 h-40 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-2xl font-bold">
-                    <i class="fa-solid fa-vr-cardboard"></i>
-                </div>
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-teal-400">Module de Prévention RESTEV</span>
-                    <h2 class="text-2xl font-black text-white">Chasse aux Risques en Atelier</h2>
-                </div>
+        <div class="features-grid">
+          <div class="feature-item">
+            <div class="feature-icon amber-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
+            <div class="feature-title">Touchpad & Mouse 360° Look</div>
+            <div class="feature-desc">Drag with your laptop touchpad or touch screen to look 360° in every direction smoothly without needing a physical mouse.</div>
+          </div>
 
-            <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
-                Bienvenue dans cette simulation immersive de sécurité au travail. Votre mission est de repérer et corriger <strong class="text-teal-300">5 situations dangereuses</strong> dissimulées dans l'atelier industriel avant la fin du temps.
+          <div class="feature-item">
+            <div class="feature-icon blue-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="feature-title">Easy Hazard Spotting (Glowing Beacons)</div>
+            <div class="feature-desc">Active hazards feature glowing yellow beacons and wide detection ranges, making spotting straightforward and engaging.</div>
+          </div>
+
+          <div class="feature-item">
+            <div class="feature-icon green-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="feature-title">Educational Hazard Revelation</div>
+            <div class="feature-desc">If any hazard is missed, the end-of-game report reveals its exact location and correct safety action for maximum learning.</div>
+          </div>
+        </div>
+
+        <div style="text-align: center;">
+          <button id="btn-intro-rules" class="btn btn-secondary btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Instructions & Touchpad Controls Guide
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. INSTRUCTIONS / HOW TO PLAY SCREEN -->
+    <div id="screen-rules" class="screen">
+      <div class="card card-wide">
+        <div class="card-header-flex">
+          <div>
+            <div class="badge-tag yellow-tag">Simulator Training Manual</div>
+            <h2 class="section-title">Hazard Perception Gameplay & Touchpad Controls</h2>
+          </div>
+          <button id="btn-rules-back" class="btn btn-secondary">Back to Main Menu</button>
+        </div>
+
+        <div class="rules-grid">
+          <div class="rule-box">
+            <div class="rule-num">1</div>
+            <h3>360° Looking (Touchpad & Mouse)</h3>
+            <p>Look around the 3D warehouse environment smoothly using multiple input methods:</p>
+            <ul class="rule-list">
+              <li><strong>Touchpad / Touch Screen:</strong> Click/touch and <strong>Drag</strong> anywhere on the 3D view to rotate camera 360°.</li>
+              <li><strong>Mouse Pointer Lock:</strong> Click the 3D view to lock mouse for high-sensitivity aiming.</li>
+              <li><kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> or Arrow Keys to walk around.</li>
+              <li>Use the on-screen <strong>Virtual D-Pad</strong> to walk on laptop touchpads or mobile displays.</li>
+            </ul>
+          </div>
+
+          <div class="rule-box">
+            <div class="rule-num">2</div>
+            <h3>Easy Hazard Spotting</h3>
+            <p>Search the warehouse for dangerous situations:</p>
+            <ul class="rule-list">
+              <li>Look for glowing yellow pulsing beacon rings on the floor.</li>
+              <li>Aim your center crosshair directly at a potential hazard object.</li>
+              <li>Press <kbd>E</kbd>, Left Click, or tap the on-screen <strong>⚠️ SPOT HAZARD</strong> button.</li>
+              <li>Select the correct hazard category to earn 20 points!</li>
+            </ul>
+          </div>
+
+          <div class="rule-box">
+            <div class="rule-num">3</div>
+            <h3>Scoring & Continuous Flow</h3>
+            <p>Maximise your training score:</p>
+            <ul class="rule-list">
+              <li><strong>Max Score:</strong> 100 Points per scenario.</li>
+              <li><strong>Continuous Flow:</strong> After identifying a hazard, you immediately resume walking without re-clicking!</li>
+              <li><strong>Educational Reveal:</strong> Any missed hazards are fully revealed at the end with safe solutions.</li>
+            </ul>
+          </div>
+
+          <div class="rule-box">
+            <div class="rule-num">4</div>
+            <h3>Educational Safety Quiz</h3>
+            <p>Consolidate your safety learning:</p>
+            <ul class="rule-list">
+              <li>Complete 5 practical, easy-to-understand safety quiz questions.</li>
+              <li>Review instant feedback and detailed safety guidance explanations.</li>
+              <li>Your overall score (out of 100) is saved to SQLite.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <button id="btn-rules-start-now" class="btn btn-primary btn-lg">
+            Proceed to Player Portal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PLAYER DASHBOARD SCREEN -->
+    <div id="screen-dashboard" class="screen">
+      <div class="card card-wide">
+        <div class="dashboard-header">
+          <div>
+            <div class="badge-tag green-tag">Logistics Operator Dashboard</div>
+            <h2 id="dash-welcome-text" class="section-title">Welcome, Trainee</h2>
+            <p class="section-desc">Select a 360° warehouse scenario below to start your hazard perception training (100 Max Points).</p>
+          </div>
+          <button id="btn-dash-history" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+            My Attempt History
+          </button>
+        </div>
+
+        <!-- PLAYER METRICS KPI GRID (100 SCORE SCALE) -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon yellow-bg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div>
+              <div class="stat-num" id="dash-stat-high">0 / 100</div>
+              <div class="stat-label">Highest Score</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon blue-bg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div>
+              <div class="stat-num" id="dash-stat-avg">0.0 / 100</div>
+              <div class="stat-label">Average Score</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon green-bg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <div class="stat-num" id="dash-stat-hazards">0</div>
+              <div class="stat-label">Hazards Identified</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon purple-bg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div>
+              <div class="stat-num" id="dash-stat-games">0</div>
+              <div class="stat-label">Total Games Completed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCENARIOS SELECTION GRID -->
+        <h3 class="subsection-title" style="margin-top: 2rem;">Available 360° Warehouse Scenarios</h3>
+        <div id="scenarios-container" class="scenarios-grid">
+          <!-- Dynamically populated scenario cards -->
+        </div>
+
+        <!-- RECENT ACTIVITY TABLE -->
+        <h3 class="subsection-title" style="margin-top: 2rem;">Recent Training Attempts</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Scenario</th>
+                <th>Score (Max 100)</th>
+                <th>Accuracy</th>
+                <th>Hazards Found</th>
+                <th>Avg Reaction</th>
+                <th>Quiz Score</th>
+              </tr>
+            </thead>
+            <tbody id="dash-recent-tbody">
+              <tr><td colspan="7" class="text-center">No previous training attempts recorded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ACTIVE 3D GAMEPLAY SCREEN -->
+    <div id="screen-game" class="screen">
+      <!-- GAMEPLAY HUD HEADER -->
+      <div class="game-hud-top">
+        <div class="hud-group">
+          <div class="hud-pill">
+            <span class="hud-lbl">ZONE</span>
+            <span id="hud-scenario-title" class="hud-val">Walkway Aisle</span>
+          </div>
+          <div class="hud-pill">
+            <span class="hud-lbl">TIME LEFT</span>
+            <span id="hud-timer-val" class="hud-val timer-normal">120s</span>
+          </div>
+        </div>
+
+        <div class="hud-group">
+          <div class="hud-pill">
+            <span class="hud-lbl">SCORE</span>
+            <span id="hud-score-val" class="hud-val score-highlight">0</span>
+          </div>
+          <div class="hud-pill">
+            <span class="hud-lbl">SPOTTED</span>
+            <span id="hud-found-val" class="hud-val">0 / 5</span>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <button id="btn-game-help" class="hud-btn" title="Controls Help">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </button>
+          <button id="btn-game-pause" class="hud-btn" title="Pause Game">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D VIEWPORT CONTAINER -->
+      <div id="viewport-container" class="viewport-frame">
+        <!-- Three.js 3D WebGL Canvas -->
+        <canvas id="three-canvas" style="touch-action: none;"></canvas>
+
+        <!-- CENTER AIM CROSSHAIR -->
+        <div id="game-crosshair" class="crosshair-indicator">
+          <div class="crosshair-dot"></div>
+        </div>
+
+        <!-- TARGETED HAZARD INTERACTION PROMPT -->
+        <div id="hazard-prompt" class="hazard-prompt-banner" style="display: none;">
+          <div class="prompt-icon">⚠️</div>
+          <div class="prompt-text">
+            <strong id="prompt-hazard-name">POTENTIAL HAZARD TARGETED</strong>
+            <span>Press <kbd>E</kbd> / Click / Tap Spot Button</span>
+          </div>
+        </div>
+
+        <!-- ON-SCREEN VIRTUAL D-PAD MOVEMENT CONTROLS (BOTTOM LEFT) -->
+        <div id="dpad-container" class="dpad-container">
+          <button id="btn-move-fwd" class="dpad-btn dpad-up" title="Walk Forward (W)">▲</button>
+          <button id="btn-move-left" class="dpad-btn dpad-left" title="Strafe Left (A)">◄</button>
+          <button id="btn-move-back" class="dpad-btn dpad-down" title="Walk Backward (S)">▼</button>
+          <button id="btn-move-right" class="dpad-btn dpad-right" title="Strafe Right (D)">►</button>
+        </div>
+
+        <!-- ON-SCREEN TOUCH / TOUCHPAD SPOT HAZARD BUTTON (BOTTOM RIGHT) -->
+        <button id="btn-touch-spot" class="touch-spot-btn" title="Identify Targeted Hazard (E)">
+          ⚠️ SPOT HAZARD (E)
+        </button>
+
+        <!-- TOUCHPAD & MOUSE DRAG INSTRUCTION OVERLAY -->
+        <div id="pointerlock-banner" class="pointerlock-overlay">
+          <div class="pl-content">
+            <div class="pl-icon">🖱️</div>
+            <h3>Touchpad & Mouse 360° Controls Ready</h3>
+            <p style="margin-bottom: 0.5rem; color: var(--accent-yellow); font-weight: 700;">
+              • Touchpad / Touch: Drag on 3D View to Look 360°<br>
+              • D-Pad / WASD: Walk Around | Tap "SPOT HAZARD" Button to Identify
             </p>
-
-            <div class="space-y-3 mb-8">
-                <div class="glass-card p-3.5 rounded-xl flex items-start gap-3">
-                    <i class="fa-solid fa-computer-mouse text-teal-400 mt-1"></i>
-                    <div class="text-xs sm:text-sm text-slate-300">
-                        <strong class="text-white block">Sur Ordinateur / Mobile :</strong>
-                        Déplacez-vous avec les touches <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-600 font-mono text-slate-200">ZQSD</kbd> ou les flèches, orientez le regard à la souris/toucher et cliquez sur les anomalies.
-                    </div>
-                </div>
-                <div class="glass-card p-3.5 rounded-xl flex items-start gap-3">
-                    <i class="fa-solid fa-headset text-teal-400 mt-1"></i>
-                    <div class="text-xs sm:text-sm text-slate-300">
-                        <strong class="text-white block">En Casque VR (Meta Quest, etc.) :</strong>
-                        Cliquez sur le bouton <span class="text-teal-300 font-semibold">"VR"</span> en bas à droite pour entrer en immersion totale. Utilisez la gâchette des manettes pour pointer et sélectionner.
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="startSimulation()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-extrabold text-base tracking-wide shadow-lg shadow-teal-500/25 transition-all duration-200 transform active:scale-98 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-play"></i> Démarrer l'Inspection
+            <button id="btn-start-gameplay-touch" class="btn btn-primary" style="margin-top: 0.5rem;">
+              Click / Tap to Start Playing
             </button>
+          </div>
         </div>
+      </div>
+
+      <!-- FOOTER FEEDBACK BANNER -->
+      <div class="game-hud-bottom">
+        <div id="feedback-banner" class="feedback-banner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="feedback-text">Look for glowing yellow hazard beacons on the floor. Drag touchpad to look 360°. Walk through the aisle!</span>
+        </div>
+      </div>
     </div>
 
-    <!-- HAZARD DETAIL MODAL -->
-    <div id="modal-hazard" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
-        <div class="glass-panel max-w-2xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-700/60 relative max-h-[90vh] flex flex-col justify-between">
-            
-            <div class="overflow-y-auto pr-2">
-                <!-- Header badge -->
-                <div class="flex items-center justify-between mb-4">
-                    <span id="hazard-category-badge" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        Risque Détecté
-                    </span>
-                    <span id="hazard-step-text" class="text-xs font-bold text-slate-400">1 / 5 Identifié</span>
-                </div>
+    <!-- 5. END-OF-SCENARIO QUIZ SCREEN -->
+    <div id="screen-quiz" class="screen">
+      <div class="card card-wide" style="max-width: 800px; margin: 0 auto;">
+        <div class="badge-tag blue-tag">Post-Scenario Safety Assessment</div>
+        <h2 class="section-title">Practical Workplace Safety Quiz</h2>
+        <p class="section-desc">Answer 5 practical safety questions directly based on hazards in this scenario.</p>
 
-                <h3 id="hazard-title" class="text-xl sm:text-2xl font-black text-white mb-3">Titre du Risque</h3>
-                
-                <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 mb-5">
-                    <h4 class="text-xs uppercase font-bold text-slate-400 tracking-wider mb-1">Constat sur le terrain</h4>
-                    <p id="hazard-description" class="text-slate-200 text-sm sm:text-base leading-relaxed">Description détaillée du problème constaté...</p>
-                </div>
-
-                <!-- Regulatory & RESTEV Recommendations -->
-                <div class="space-y-4 mb-6">
-                    <div class="border-l-4 border-amber-500 pl-4 py-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">Cadre Réglementaire (Code du Travail / INRS)</h4>
-                        <p id="hazard-regulation" class="text-xs sm:text-sm text-slate-300 mt-1">Référence légale ou norme associée.</p>
-                    </div>
-
-                    <div class="border-l-4 border-teal-500 pl-4 py-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-teal-400">Préconisation & Action RESTEV</h4>
-                        <p id="hazard-prevention" class="text-xs sm:text-sm text-slate-300 mt-1">Actions correctives prioritaires à mettre en œuvre.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Action Footer -->
-            <div class="pt-4 border-t border-slate-800/80 flex items-center justify-end">
-                <button onclick="closeHazardModal()" class="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-bold text-sm tracking-wide shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
-                    Compris, Continuer <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
+        <div id="quiz-container" class="quiz-container">
+          <!-- Quiz questions injected here -->
         </div>
+
+        <div style="text-align: right; margin-top: 1.5rem;">
+          <button id="btn-quiz-submit" class="btn btn-primary btn-lg">
+            Submit Answers & View Results
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- VICTORY MODAL -->
-    <div id="modal-victory" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-lg hidden transition-all duration-300">
-        <div class="glass-panel max-w-xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-emerald-500/40 text-center relative overflow-hidden">
-            <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- 6. GAME RESULTS & CERTIFICATE SCREEN (MAX SCORE 100 + MISSED HAZARDS REVEAL) -->
+    <div id="screen-results" class="screen">
+      <div class="card card-wide" style="max-width: 850px; margin: 0 auto;">
+        <div class="results-header">
+          <div class="score-ring">
+            <div id="res-score-num" class="score-num">0</div>
+            <div id="res-score-max" class="score-max">OUT OF 100</div>
+          </div>
 
-            <div class="w-20 h-20 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-4xl mx-auto mb-4 border border-emerald-500/40 shadow-inner">
-                <i class="fa-solid fa-trophy"></i>
+          <div id="res-rating-badge" class="rating-badge">PASS — SAFETY CONSCIOUS</div>
+          <h2 id="res-scenario-name" class="results-title">Scenario Performance Summary</h2>
+          <p id="res-feedback-desc" class="results-desc">Evaluating performance data...</p>
+
+          <div id="db-save-status" class="db-status-msg"></div>
+        </div>
+
+        <!-- RESULTS METRICS BREAKDOWN -->
+        <div class="results-stats-grid">
+          <div class="res-stat-box">
+            <span class="res-val" id="res-val-accuracy">0%</span>
+            <span class="res-lbl">Accuracy</span>
+          </div>
+          <div class="res-stat-box">
+            <span class="res-val" id="res-val-found">0 / 0</span>
+            <span class="res-lbl">Hazards Spotted</span>
+          </div>
+          <div class="res-stat-box">
+            <span class="res-val" id="res-val-reaction">0.0s</span>
+            <span class="res-lbl">Avg Reaction Time</span>
+          </div>
+          <div class="res-stat-box">
+            <span class="res-val" id="res-val-quiz">0 / 5</span>
+            <span class="res-lbl">Quiz Score</span>
+          </div>
+        </div>
+
+        <!-- EDUCATIONAL REVEAL BOX FOR MISSED HAZARDS -->
+        <div id="res-missed-hazards-box"></div>
+
+        <!-- HAZARD ITEMIZATION TABLE -->
+        <h3 class="subsection-title" style="margin-top: 1.5rem;">Hazards Spotting Breakdown</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Hazard Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Points</th>
+                <th>Safety Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="res-hazards-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="disclaimer-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>This simulation score is an academic workplace safety training result and does not replace formal HSE equipment licensing.</span>
+        </div>
+
+        <div class="btn-group" style="justify-content: center; margin-top: 1.5rem;">
+          <button id="btn-res-replay" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Replay Scenario
+          </button>
+          <button id="btn-res-dashboard" class="btn btn-secondary">
+            Return to Player Portal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. ADMIN PORTAL SCREEN -->
+    <div id="screen-admin" class="screen">
+      <div class="card card-wide">
+        <div class="admin-header-flex">
+          <div>
+            <div class="badge-tag admin-tag">
+              🛡️ Safety Instructor & Admin Portal
             </div>
+            <h2 class="section-title">Warehouse Training Administration</h2>
+            <p class="section-desc">Manage registered players, inspect real-time SQLite safety analytics, and edit hazard scenarios.</p>
+          </div>
+          <button id="btn-admin-close" class="btn btn-secondary">Close Admin Portal</button>
+        </div>
 
-            <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Félicitations !</span>
-            <h2 class="text-2xl sm:text-3xl font-black text-white mt-1 mb-2">Inspection Terminée avec Succès</h2>
-            <p class="text-slate-300 text-sm mb-6">Vous avez identifié l'ensemble des 5 risques critiques de l'atelier RESTEV.</p>
-
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="glass-card p-4 rounded-2xl">
-                    <span class="text-xs text-slate-400 font-semibold block uppercase">Risques Résolus</span>
-                    <span class="text-2xl font-black text-emerald-400">5 / 5</span>
-                </div>
-                <div class="glass-card p-4 rounded-2xl">
-                    <span class="text-xs text-slate-400 font-semibold block uppercase">Temps Effectué</span>
-                    <span id="final-time" class="text-2xl font-black text-teal-300 font-mono">00:00</span>
-                </div>
+        <!-- ADMIN METRICS CARDS -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue-bg">👥</div>
+            <div>
+              <div class="stat-num" id="adm-stat-players">0</div>
+              <div class="stat-label">Registered Players</div>
             </div>
+          </div>
 
-            <div class="p-4 bg-teal-950/40 rounded-2xl border border-teal-800/50 text-left mb-6">
-                <div class="flex items-center gap-2 text-teal-300 font-bold text-sm mb-1">
-                    <i class="fa-solid fa-shield-heart"></i> Engagement RESTEV
-                </div>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                    Un atelier sécurisé repose sur la vigilance de chacun. Transmettez ces réflexes dans vos équipes et faites appel aux préventeurs RESTEV pour vos évaluations de risques (DUERP).
-                </p>
+          <div class="stat-card">
+            <div class="stat-icon purple-bg">🎮</div>
+            <div>
+              <div class="stat-num" id="adm-stat-sessions">0</div>
+              <div class="stat-label">Total Completed Sessions</div>
             </div>
+          </div>
 
-            <button onclick="resetSimulation()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-base tracking-wide shadow-lg shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-rotate-right"></i> Recommencer une Session
+          <div class="stat-card">
+            <div class="stat-icon yellow-bg">⭐</div>
+            <div>
+              <div class="stat-num" id="adm-stat-avg-score">0.0 / 100</div>
+              <div class="stat-label">Class Average Score</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon green-bg">🎯</div>
+            <div>
+              <div class="stat-num" id="adm-stat-accuracy">0%</div>
+              <div class="stat-label">Average Accuracy</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon amber-bg">⚡</div>
+            <div>
+              <div class="stat-num" id="adm-stat-reaction">0.0s</div>
+              <div class="stat-label">Avg Reaction Time</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERFORMANCE CHARTS SECTION -->
+        <div class="admin-charts-grid" style="margin-top: 1.5rem;">
+          <div class="chart-card">
+            <h4>Player Accuracy Distribution (%)</h4>
+            <canvas id="chart-accuracy" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <h4>Scenario Completion Metrics</h4>
+            <canvas id="chart-completion" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- ADMIN NAVIGATION TABS -->
+        <div class="tab-bar" style="margin-top: 2rem;">
+          <button id="tab-btn-players" class="tab-btn active">👥 Registered Players</button>
+          <button id="tab-btn-sessions" class="tab-btn">📜 Game Sessions Log</button>
+          <button id="tab-btn-scenarios" class="tab-btn">⚙️ Scenario & Hazard Manager</button>
+          <button id="tab-btn-quizzes" class="tab-btn">❓ Quiz Question Bank</button>
+        </div>
+
+        <!-- TAB 1: REGISTERED PLAYERS -->
+        <div id="tab-view-players" class="tab-content active">
+          <div class="filter-bar">
+            <input type="text" id="admin-search-players" class="form-input" placeholder="Search player by name, username, or email...">
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Full Name</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Joined</th>
+                  <th>Sessions</th>
+                  <th>Best Score</th>
+                  <th>Avg Accuracy</th>
+                  <th>Avg Reaction</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adm-players-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: GAME SESSIONS LOG -->
+        <div id="tab-view-sessions" class="tab-content">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Player</th>
+                  <th>Scenario</th>
+                  <th>Score (Max 100)</th>
+                  <th>Accuracy</th>
+                  <th>Hazards Found</th>
+                  <th>Avg Reaction</th>
+                  <th>Quiz</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="adm-sessions-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: SCENARIO & HAZARD MANAGER -->
+        <div id="tab-view-scenarios" class="tab-content">
+          <div class="tab-actions">
+            <button id="btn-admin-add-scenario" class="btn btn-primary">
+              + Add New Scenario
             </button>
-        </div>
-    </div>
-
-    <!-- HELP MODAL -->
-    <div id="modal-help" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
-        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl shadow-2xl border border-slate-700/60">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-circle-info text-teal-400"></i> Instructions & Navigation
-                </h3>
-                <button onclick="closeHelpModal()" class="text-slate-400 hover:text-white p-2">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="space-y-3 text-sm text-slate-300 mb-6">
-                <p><strong class="text-white">But du jeu :</strong> Parcourez l'atelier et trouvez les 5 dangers matérialisés ou anormaux.</p>
-                <div class="p-3 bg-slate-900 rounded-xl space-y-2 text-xs">
-                    <div class="flex justify-between items-center"><span class="text-slate-400">Déplacement clavier :</span> <span class="font-mono text-teal-300">Z, Q, S, D ou Flèches</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-400">Sauter / Monter :</span> <span class="font-mono text-teal-300">Barre d'espace</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-400">Orientation caméra :</span> <span class="font-mono text-teal-300">Glisser la souris</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-400">Interagir avec un risque :</span> <span class="font-mono text-teal-300">Clic gauche / Pointer VR</span></div>
-                </div>
-            </div>
-
-            <button onclick="closeHelpModal()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition">
-                Fermer
+            <button id="btn-admin-add-hazard" class="btn btn-secondary">
+              + Add Hazard to Scenario
             </button>
+          </div>
+
+          <h4 style="margin-top: 1rem; color: var(--accent-yellow);">Configured 3D Scenarios</h4>
+          <div id="adm-scenarios-list" class="scenarios-grid"></div>
+
+          <h4 style="margin-top: 2rem; color: var(--accent-yellow);">Scenario Hazards Database</h4>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Scenario</th>
+                  <th>Hazard Name</th>
+                  <th>Category</th>
+                  <th>Difficulty</th>
+                  <th>3D Coordinates (X, Y, Z)</th>
+                  <th>Score Value</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adm-hazards-tbody"></tbody>
+            </table>
+          </div>
         </div>
+
+        <!-- TAB 4: QUIZ QUESTION BANK -->
+        <div id="tab-view-quizzes" class="tab-content">
+          <div class="tab-actions">
+            <button id="btn-admin-add-quiz" class="btn btn-primary">
+              + Add Quiz Question
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Scenario</th>
+                  <th>Question</th>
+                  <th>Correct Answer</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adm-quizzes-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
     </div>
 
-    <!-- 3D A-FRAME VR SCENE -->
-    <div id="canvas-container" class="w-full h-full absolute inset-0 z-10">
-        <a-scene embedded style="width: 100%; height: 100%;" cursor="rayOrigin: mouse" raycaster="objects: .clickable" vr-mode-ui="enabled: true">
-            
-            <!-- Assets Management -->
-            <a-assets>
-                <!-- Generated visual textures/colors -->
-            </a-assets>
+  </div> <!-- End App Container -->
 
-            <!-- CAMERA & CONTROLLERS -->
-            <a-entity id="rig" position="0 0 7" movement-controls="speed: 0.2">
-                <!-- Camera -->
-                <a-camera id="camera" position="0 1.6 0" look-controls="pointerLockEnabled: false">
-                    <!-- Cursor for gaze/desktop click feedback -->
-                    <a-cursor id="cursor"
-                        geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-                        material="color: #14b8a6; shader: flat"
-                        position="0 0 -1"
-                        raycaster="objects: .clickable">
-                    </a-cursor>
-                </a-camera>
+  <!-- HAZARD IDENTIFICATION MODAL DIALOG -->
+  <div id="modal-hazard-spot" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="badge-tag red-tag" style="margin-bottom: 0.5rem;">⚠️ Hazard Identification Required</div>
+      <h3 id="spot-modal-title" style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.5rem;">Targeted Object Identification</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        You targeted an active potential hazard. Select the correct hazard category to confirm your spotting:
+      </p>
 
-                <!-- VR Controllers with Raycasters -->
-                <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 10" line="color: #14b8a6; opacity: 0.8"></a-entity>
-                <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 10" line="color: #14b8a6; opacity: 0.8"></a-entity>
-            </a-entity>
+      <form id="form-hazard-spot">
+        <div class="category-options-grid">
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Spills & Slip Hazards" required>
+            <span class="cat-box">
+              <span class="cat-icon">🛢️</span>
+              <span class="cat-title">Spills & Slip Hazards</span>
+              <span class="cat-desc">Liquids, oils, chemical leaks</span>
+            </span>
+          </label>
 
-            <!-- ENVIRONMENT LIGHTING -->
-            <a-ambient-light color="#8899ac" intensity="0.65"></a-ambient-light>
-            <a-directional-light color="#ffffff" intensity="0.8" position="-5 10 5" cast-shadow="true"></a-directional-light>
-            <a-point-light color="#14b8a6" intensity="0.4" position="0 4 0"></a-point-light>
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Blocked Walkway & Debris">
+            <span class="cat-box">
+              <span class="cat-icon">📦</span>
+              <span class="cat-title">Blocked Walkway & Debris</span>
+              <span class="cat-desc">Pallets, boxes, trip clutter</span>
+            </span>
+          </label>
 
-            <!-- WORKSHOP ROOM STRUCTURE -->
-            <!-- Floor -->
-            <a-plane position="0 0 0" rotation="-90 0 0" width="24" height="20" color="#334155" roughness="0.8"></a-plane>
-            
-            <!-- Floor Safety Walkway Lines (Yellow) -->
-            <a-plane position="0 0.01 0" rotation="-90 0 0" width="0.2" height="18" color="#f59e0b"></a-plane>
-            <a-plane position="-4 0.01 0" rotation="-90 0 0" width="0.2" height="18" color="#f59e0b"></a-plane>
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Electrical & Cable Risks">
+            <span class="cat-box">
+              <span class="cat-icon">⚡</span>
+              <span class="cat-title">Electrical & Cable Risks</span>
+              <span class="cat-desc">Exposed wiring, bare cables</span>
+            </span>
+          </label>
 
-            <!-- Back Wall -->
-            <a-plane position="0 4 -10" rotation="0 0 0" width="24" height="8" color="#1e293b"></a-plane>
-            <!-- Front Wall -->
-            <a-plane position="0 4 10" rotation="0 180 0" width="24" height="8" color="#1e293b"></a-plane>
-            <!-- Left Wall -->
-            <a-plane position="-12 4 0" rotation="0 90 0" width="20" height="8" color="#1e293b"></a-plane>
-            <!-- Right Wall -->
-            <a-plane position="12 4 0" rotation="0 -90 0" width="20" height="8" color="#1e293b"></a-plane>
-            <!-- Ceiling -->
-            <a-plane position="0 8 0" rotation="90 0 0" width="24" height="20" color="#0f172a"></a-plane>
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Shelving & Structural Damage">
+            <span class="cat-box">
+              <span class="cat-icon">🏗️</span>
+              <span class="cat-title">Shelving & Structure</span>
+              <span class="cat-desc">Buckled posts, bowed beams</span>
+            </span>
+          </label>
 
-            <!-- Ceiling Beams -->
-            <a-box position="0 7.8 -5" width="24" height="0.4" depth="0.4" color="#0284c7"></a-box>
-            <a-box position="0 7.8 0" width="24" height="0.4" depth="0.4" color="#0284c7"></a-box>
-            <a-box position="0 7.8 5" width="24" height="0.4" depth="0.4" color="#0284c7"></a-box>
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Fire & Emergency Obstructions">
+            <span class="cat-box">
+              <span class="cat-icon">🚪</span>
+              <span class="cat-title">Emergency Obstructions</span>
+              <span class="cat-desc">Blocked exit doors, hydrants</span>
+            </span>
+          </label>
 
-            <!-- Safety Poster on Wall -->
-            <a-plane position="-7 4.5 -9.9" width="3" height="2" color="#0f172a">
-                <a-text value="RESTEV - SANTE AU TRAVAIL\nConsignes de Securite Atelier\n1. Port des EPI obligatoire\n2. Garder les voies degagees\n3. Signaler tout produit chimique" align="center" color="#ffffff" width="4.5" position="0 0 0.02"></a-text>
-            </a-plane>
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Falling Objects & Stacking">
+            <span class="cat-box">
+              <span class="cat-icon">⚠️</span>
+              <span class="cat-title">Falling Objects & Stacking</span>
+              <span class="cat-desc">Teetering crates, unstable pallets</span>
+            </span>
+          </label>
 
-            <!-- WORKSHOP FURNITURE & PROPS -->
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Forklift & Vehicle Risks">
+            <span class="cat-box">
+              <span class="cat-icon">🚜</span>
+              <span class="cat-title">Forklift & Vehicle Risks</span>
+              <span class="cat-desc">Elevated loads, reversing equipment</span>
+            </span>
+          </label>
 
-            <!-- Main Workbench 1 (Center Right) -->
-            <a-entity id="workbench-1" position="5 0 -2">
-                <!-- Tabletop -->
-                <a-box position="0 1 0" width="3.5" height="0.15" depth="1.5" color="#475569"></a-box>
-                <!-- Legs -->
-                <a-box position="-1.6 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <a-box position="1.6 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <a-box position="-1.6 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <a-box position="1.6 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <!-- Tool Box on Table -->
-                <a-box position="1 1.25 -0.2" width="0.8" height="0.35" depth="0.4" color="#dc2626"></a-box>
-            </a-entity>
+          <label class="category-card">
+            <input type="radio" name="hazard_category" value="Visibility & Blind Spots">
+            <span class="cat-box">
+              <span class="cat-icon">👁️</span>
+              <span class="cat-title">Visibility & Blind Spots</span>
+              <span class="cat-desc">High stacks at corners, dark areas</span>
+            </span>
+          </label>
+        </div>
 
-            <!-- Secondary Workbench 2 (Left) -->
-            <a-entity id="workbench-2" position="-6 0 -4">
-                <a-box position="0 1 0" width="3" height="0.15" depth="1.4" color="#475569"></a-box>
-                <a-box position="-1.4 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <a-box position="1.4 0.5 -0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <a-box position="-1.4 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-                <a-box position="1.4 0.5 0.6" width="0.1" height="1" depth="0.1" color="#1e293b"></a-box>
-            </a-entity>
-
-            <!-- Industrial Machine / Lathe Structure (Center Back) -->
-            <a-entity id="heavy-machine" position="0 0 -7">
-                <a-box position="0 1.2 0" width="4" height="2.4" depth="1.8" color="#334155"></a-box>
-                <a-box position="0 2.5 0" width="3.6" height="0.3" depth="1.4" color="#0284c7"></a-box>
-                <!-- Control Panel -->
-                <a-box position="1.2 1.6 0.95" width="0.8" height="0.9" depth="0.1" color="#0f172a"></a-box>
-                <a-cylinder position="1.4 1.8 1.02" radius="0.08" height="0.05" rotation="90 0 0" color="#ef4444"></a-cylinder>
-                <a-cylinder position="1.0 1.8 1.02" radius="0.06" height="0.05" rotation="90 0 0" color="#22c55e"></a-cylinder>
-            </a-entity>
-
-            <!-- Storage Racks (Right Wall) -->
-            <a-entity position="11 0 -2" rotation="0 -90 0">
-                <a-box position="0 2 0" width="4" height="0.1" depth="1.2" color="#64748b"></a-box>
-                <a-box position="0 1 0" width="4" height="0.1" depth="1.2" color="#64748b"></a-box>
-                <a-box position="-1.9 1.5 0" width="0.1" height="3" depth="1.2" color="#334155"></a-box>
-                <a-box position="1.9 1.5 0" width="0.1" height="3" depth="1.2" color="#334155"></a-box>
-            </a-entity>
-
-
-            <!-- HAZARD 1: Unlabeled Chemical Drum (Right side) -->
-            <a-entity id="hazard-1" class="clickable" hazard-item="id: 1" position="8 0 -3">
-                <!-- Drum Mesh -->
-                <a-cylinder id="drum-mesh" position="0 0.9 0" radius="0.55" height="1.8" color="#ea580c" roughness="0.3">
-                    <a-ring position="0 0.5 0.56" radius-inner="0.15" radius-outer="0.25" color="#fef08a" rotation="0 0 0"></a-ring>
-                    <a-text value="?" position="0 0.5 0.58" align="center" color="#000" width="4"></a-text>
-                </a-cylinder>
-
-                <!-- Interactive Glow / Indicator Pulsing Halo -->
-                <a-ring id="halo-1" position="0 0.02 0" rotation="-90 0 0" radius-inner="0.7" radius-outer="0.9" color="#f59e0b" material="transparent: true; opacity: 0.7" class="animate-pulse-glow"></a-ring>
-                
-                <a-text id="label-1" value="PRODUIT SANS ETIQUETTE" position="0 2.1 0" align="center" color="#fbbf24" width="4" side="double"></a-text>
-            </a-entity>
-
-
-            <!-- HAZARD 2: Blocked Emergency Exit (Back Left Wall) -->
-            <a-entity id="hazard-2" class="clickable" hazard-item="id: 2" position="-10 0 -9.8">
-                <!-- Emergency Door Frame -->
-                <a-box position="0 2 0" width="2.2" height="4" depth="0.1" color="#15803d"></a-box>
-                <a-plane position="0 3.7 0.06" width="1.8" height="0.4" color="#22c55e">
-                    <a-text value="SORTIE D'URGENCE" align="center" color="#ffffff" width="3" position="0 0 0.01"></a-text>
-                </a-plane>
-
-                <!-- Blocking Pallets & Crates stacked in front -->
-                <a-entity id="blocking-crates" position="0 0 0.6">
-                    <a-box position="-0.3 0.4 0" width="1.2" height="0.8" depth="0.9" color="#b45309"></a-box>
-                    <a-box position="0.4 0.3 0.2" width="1.0" height="0.6" depth="0.8" color="#d97706"></a-box>
-                    <a-box position="0 0.9 0" width="1.0" height="0.6" depth="0.7" color="#78350f"></a-box>
-                </a-entity>
-
-                <!-- Pulsing Indicator -->
-                <a-ring id="halo-2" position="0 0.02 0.8" rotation="-90 0 0" radius-inner="1.0" radius-outer="1.2" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
-                <a-text id="label-2" value="SORTIE BLOMQUEE" position="0 2.5 0.8" align="center" color="#fbbf24" width="4" side="double"></a-text>
-            </a-entity>
-
-
-            <!-- HAZARD 3: Exposed Damaged Wire on Floor (Center Walkway) -->
-            <a-entity id="hazard-3" class="clickable" hazard-item="id: 3" position="-1 0 1">
-                <!-- Loose Cable running across path -->
-                <a-cylinder id="cable-mesh" position="0 0.03 0" radius="0.04" height="3" rotation="90 0 45" color="#0f172a"></a-cylinder>
-                <!-- Exposed Stripped Copper Spark Zone -->
-                <a-sphere id="spark-mesh" position="0 0.05 0" radius="0.12" color="#ef4444" material="emissive: #f97316; emissiveIntensity: 0.8"></a-sphere>
-
-                <!-- Pulsing Indicator -->
-                <a-ring id="halo-3" position="0 0.02 0" rotation="-90 0 0" radius-inner="0.5" radius-outer="0.7" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
-                <a-text id="label-3" value="CABLE ELECTRIQUE NUDE" position="0 0.8 0" align="center" color="#fbbf24" width="3.5" side="double"></a-text>
-            </a-entity>
-
-
-            <!-- HAZARD 4: Oil Spill Slick (Near Machine) -->
-            <a-entity id="hazard-4" class="clickable" hazard-item="id: 4" position="-2 0 -5">
-                <!-- Oil puddle mesh -->
-                <a-cylinder id="oil-mesh" position="0 0.01 0" radius="1.1" height="0.01" color="#020617" roughness="0.1" metalness="0.8"></a-cylinder>
-
-                <!-- Pulsing Indicator -->
-                <a-ring id="halo-4" position="0 0.02 0" rotation="-90 0 0" radius-inner="1.2" radius-outer="1.4" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
-                <a-text id="label-4" value="FLAQUE D'HUILE GLISSANTE" position="0 1.0 0" align="center" color="#fbbf24" width="3.5" side="double"></a-text>
-            </a-entity>
-
-
-            <!-- HAZARD 5: Unprotected Bench Grinder Machine (Workbench 2) -->
-            <a-entity id="hazard-5" class="clickable" hazard-item="id: 5" position="-6 1.08 -4">
-                <!-- Grinder Motor Base -->
-                <a-box position="0 0.2 0" width="0.6" height="0.3" depth="0.4" color="#1e293b"></a-box>
-                <!-- Grinding Wheels -->
-                <a-cylinder position="-0.35 0.25 0" radius="0.25" height="0.08" rotation="0 0 90" color="#64748b"></a-cylinder>
-                <a-cylinder id="grinder-wheel" position="0.35 0.25 0" radius="0.25" height="0.08" rotation="0 0 90" color="#ef4444"></a-cylinder>
-
-                <!-- Pulsing Indicator -->
-                <a-ring id="halo-5" position="0 0.6 0" rotation="0 0 0" radius-inner="0.4" radius-outer="0.5" color="#f59e0b" material="transparent: true; opacity: 0.7"></a-ring>
-                <a-text id="label-5" value="MEULEUSE SANS PROTECTION" position="0 0.9 0" align="center" color="#fbbf24" width="3.5" side="double"></a-text>
-            </a-entity>
-
-        </a-scene>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">
+            Confirm Category (+20 Pts)
+          </button>
+          <button type="button" id="btn-spot-cancel" class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <script>
-        /* State Management */
-        const state = {
-            started: false,
-            audioEnabled: true,
-            startTime: null,
-            timerInterval: null,
-            foundHazards: new Set(),
-            totalHazards: 5
-        };
+  <!-- SPOT CONFIRMATION FEEDBACK MODAL -->
+  <div id="modal-spot-feedback" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 520px; text-align: center;">
+      <div id="fb-icon" style="font-size: 3rem; margin-bottom: 0.5rem;">✅</div>
+      <h3 id="fb-title" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--accent-yellow);">Correct Hazard Spotting!</h3>
+      <div id="fb-score-tag" class="badge-tag green-tag" style="font-size: 1rem; margin-bottom: 1rem;">+20 POINTS</div>
+      <p id="fb-explanation" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem;">Risk explanation...</p>
+      
+      <div style="background: rgba(30, 41, 59, 0.6); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-yellow); text-align: left; margin-bottom: 1.5rem;">
+        <strong style="color: var(--accent-yellow); font-size: 0.9rem;">Recommended Safety Response:</strong>
+        <p id="fb-recommendation" style="font-size: 0.88rem; color: var(--text-main); margin-top: 4px;">Safety recommendation text...</p>
+      </div>
 
-        /* Hazard Database - RESTEV Occupational Safety Content */
-        const hazardsData = {
-            1: {
-                title: "Bidon de Produit Chimique sans Étiquetage",
-                category: "Risque Chimique / FDS",
-                categoryClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-                description: "Un fût contenant un solvant ou produit toxique est déposé sans étiquette de danger CLP/SGH ni Fiche de Données de Sécurité (FDS) accessible.",
-                regulation: "Code du Travail - Art. R4412-127 : Tout récipient contenant un produit chimique dangereux doit porter une étiquette claire indiquant les risques et les précautions d'emploi.",
-                prevention: "Réétiqueter immédiatement le contenant avec les pictogrammes de danger réglementaires. Rendre la FDS accessible et former les opérateurs au port des EPI adaptés."
-            },
-            2: {
-                title: "Issue de Secours Encombrée par des Palettes",
-                category: "Risque d'Évacuation / Incendie",
-                categoryClass: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-                description: "La porte de sortie d'urgence est complètement obstruée par un stockage temporaire de cartons et de palettes en bois.",
-                regulation: "Code du Travail - Art. R4227-4 à R4227-14 : Les dégagements et voies d'évacuation doivent être maintenus libres de tout obstacle en permanence.",
-                prevention: "Dégager immédiatement l'accès à la porte. Matérialiser une zone d'interdiction de dépôt au sol (hachures jaunes et noires) de 1,20 m minimum."
-            },
-            3: {
-                title: "Câble Électrique Dénudé au Sol",
-                category: "Risque Électrique & Chute",
-                categoryClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-                description: "Un câble d'alimentation électrique détérioré traîne en travers de l'allée principale avec des conducteurs en cuivre apparents.",
-                regulation: "Code du Travail - Art. R4226-1 : Les installations électriques doivent être maintenues en bon état d'isolement et protégées contre les détériorations mécaniques.",
-                prevention: "Consigner/Mettre hors tension immédiatement l'équipement. Remplacer le cordon endommagé et installer un protège-câble de sol haute résistance."
-            },
-            4: {
-                title: "Flaque d'Huile Mécanique Non Signalée",
-                category: "Risque de Glissade / Chute de plein pied",
-                categoryClass: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-                description: "Une fuite de lubrifiant sous une machine crée une zone glissante importante directement sur la voie de passage des opérateurs.",
-                regulation: "INRS ED 6158 : Les chutes de plein pied représentent la 2ème cause d'accidents du travail. Le sol doit être propre, sec et sans obstacle.",
-                prevention: "Balisersur-le-champ la zone avec un cône de danger, appliquer un absorbant végétal ou minéral, puis réparer la fuite carter de la machine."
-            },
-            5: {
-                title: "Meuleuse d'Établi sans Écran de Protection ni EPI",
-                category: "Risque de Projection / Équipement de travail",
-                categoryClass: "bg-orange-500/20 text-orange-300 border-orange-500/30",
-                description: "Le touret à meuler est utilisé sans son carter protecteur transparent et aucune paire de lunettes de sécurité n'est présente au poste.",
-                regulation: "Code du Travail - Art. R4324-1 et R4324-21 : Les éléments mobiles de travail présentant un risque de projection doivent être munis de protecteurs efficaces.",
-                prevention: "Fixer un écran pare-étincelles orientable en polycarbonate, régler le porte-pièce à 2 mm du disque et imposer le port obligatoire des lunettes/visière."
-            }
-        };
+      <button id="btn-fb-continue" class="btn btn-primary" style="width: 100%;">
+        Continue Exploring Warehouse
+      </button>
+    </div>
+  </div>
 
-        /* A-Frame Component for Hazard Interaction */
-        AFRAME.registerComponent('hazard-item', {
-            schema: { id: { type: 'int' } },
-            init: function () {
-                const el = this.el;
-                const hazardId = this.data.id;
+  <!-- AUTHENTICATION MODAL -->
+  <div id="modal-auth" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 500px;">
+      <button id="modal-auth-close" class="modal-close">&times;</button>
 
-                // Mouse / Pointer Hover Feedback
-                el.addEventListener('mouseenter', () => {
-                    if (!state.foundHazards.has(hazardId)) {
-                        document.body.style.cursor = 'pointer';
-                    }
-                });
+      <div class="auth-tabs">
+        <button id="auth-tab-login" class="auth-tab active">Player Portal Login</button>
+        <button id="auth-tab-admin-login" class="auth-tab">Admin Login</button>
+        <button id="auth-tab-register" class="auth-tab">Register Player</button>
+      </div>
 
-                el.addEventListener('mouseleave', () => {
-                    document.body.style.cursor = 'default';
-                });
+      <div id="auth-alert" class="auth-alert" style="display: none;"></div>
 
-                // Click / Trigger Event
-                el.addEventListener('click', () => {
-                    handleHazardSelect(hazardId);
-                });
-            }
-        });
+      <!-- PLAYER LOGIN FORM -->
+      <form id="form-login" class="auth-form active">
+        <div style="margin-bottom: 1rem; text-align: center; color: var(--accent-yellow); font-size: 0.9rem; font-weight: 700;">
+          🎮 PLAYER & TRAINEE SIGN IN
+        </div>
+        <div class="form-group">
+          <label>Username or Email</label>
+          <input type="text" id="login-username" class="form-input" placeholder="e.g. player1 or operator@warehouse.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+          Sign In to Player Portal
+        </button>
+        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+          Demo Player Credential: <strong>player1</strong> / <strong>player123</strong>
+        </div>
+      </form>
 
-        /* WEB AUDIO API - Synthesized Sound Effects (No External Sound Files) */
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      <!-- ADMIN LOGIN FORM -->
+      <form id="form-admin-login" class="auth-form">
+        <div style="margin-bottom: 1rem; text-align: center; color: var(--accent-purple); font-size: 0.9rem; font-weight: 700;">
+          🛡️ SAFETY INSTRUCTOR & ADMIN SIGN IN
+        </div>
+        <div class="form-group">
+          <label>Admin Username or Email</label>
+          <input type="text" id="admin-login-username" class="form-input" placeholder="e.g. admin" required>
+        </div>
+        <div class="form-group">
+          <label>Admin Password</label>
+          <input type="password" id="admin-login-password" class="form-input" placeholder="Enter admin password" required>
+        </div>
+        <button type="submit" class="btn btn-admin" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
+          Sign In to Admin Portal
+        </button>
+        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+          Seed Admin Credential: <strong>admin</strong> / <strong>admin123</strong>
+        </div>
+      </form>
 
-        function playSound(type) {
-            if (!state.audioEnabled) return;
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+      <!-- REGISTRATION FORM -->
+      <form id="form-register" class="auth-form">
+        <div style="margin-bottom: 1rem; text-align: center; color: var(--accent-green); font-size: 0.9rem; font-weight: 700;">
+          📝 CREATE NEW PLAYER TRAINEE ACCOUNT
+        </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="reg-fullname" class="form-input" placeholder="e.g. Sarah Jenkins" required>
+        </div>
+        <div class="form-group">
+          <label>Choose Username</label>
+          <input type="text" id="reg-username" class="form-input" placeholder="e.g. s_jenkins" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="operator@logistics-auto.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="At least 4 characters" required minlength="4">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="reg-confirm-password" class="form-input" placeholder="Re-enter password" required minlength="4">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+          Create Player Account
+        </button>
+      </form>
+    </div>
+  </div>
 
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+  <!-- PLAYER HISTORY & PROFILE MODAL -->
+  <div id="modal-history" class="modal-backdrop">
+    <div class="modal-card card-wide" style="max-width: 700px;">
+      <button id="modal-history-close" class="modal-close">&times;</button>
+      <h3 style="font-size: 1.4rem; color: var(--accent-yellow); margin-bottom: 0.5rem;">📜 Personal Hazard Perception History</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        Your complete session logs stored persistently in SQLite.
+      </p>
 
-            const now = audioCtx.currentTime;
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1rem;">
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-num" id="ph-total-attempts" style="font-size: 1.5rem;">0</div>
+          <div class="stat-label">Total Attempts</div>
+        </div>
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-num" id="ph-best-score" style="font-size: 1.5rem; color: var(--accent-green);">0 / 100</div>
+          <div class="stat-label">Highest Score</div>
+        </div>
+        <div class="stat-card" style="padding: 0.75rem;">
+          <div class="stat-num" id="ph-avg-score" style="font-size: 1.5rem; color: var(--accent-blue);">0.0 / 100</div>
+          <div class="stat-label">Avg Score</div>
+        </div>
+      </div>
 
-            if (type === 'found') {
-                // Success Chime (Two-Tone)
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                osc.start(now);
-                osc.stop(now + 0.4);
-            } else if (type === 'victory') {
-                // Fanfare chord sound
-                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-                    const subOsc = audioCtx.createOscillator();
-                    const subGain = audioCtx.createGain();
-                    subOsc.connect(subGain);
-                    subGain.connect(audioCtx.destination);
-                    subOsc.frequency.setValueAtTime(freq, now + i * 0.1);
-                    subGain.gain.setValueAtTime(0.2, now + i * 0.1);
-                    subGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.5);
-                    subOsc.start(now + i * 0.1);
-                    subOsc.stop(now + i * 0.1 + 0.5);
-                });
-            } else if (type === 'click') {
-                // UI click
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, now);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-                osc.start(now);
-                osc.stop(now + 0.08);
-            }
-        }
+      <div class="table-wrapper" style="max-height: 300px; overflow-y: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Scenario</th>
+              <th>Score (Max 100)</th>
+              <th>Accuracy</th>
+              <th>Avg Reaction</th>
+            </tr>
+          </thead>
+          <tbody id="ph-history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        /* Start Simulation */
-        function startSimulation() {
-            playSound('click');
-            document.getElementById('modal-welcome').classList.add('hidden');
-            state.started = true;
-            state.startTime = Date.now();
-            
-            // Start Timer
-            state.timerInterval = setInterval(updateTimer, 1000);
-        }
+  <!-- PAUSE / HELP MODAL -->
+  <div id="modal-pause" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 480px; text-align: center;">
+      <h3 style="font-size: 1.5rem; color: var(--accent-yellow); margin-bottom: 0.5rem;">⏸️ Simulation Paused</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Take a breath. Adjust camera settings or resume your hazard perception test.
+      </p>
 
-        /* Timer Update Function */
-        function updateTimer() {
-            if (!state.startTime) return;
-            const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
-            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
-            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-            const timeStr = `${minutes}:${seconds}`;
-            
-            document.getElementById('timer-text').innerText = timeStr;
-            document.getElementById('final-time').innerText = timeStr;
-        }
+      <div style="margin-bottom: 1.5rem; text-align: left; background: rgba(30, 41, 59, 0.6); padding: 1rem; border-radius: 8px;">
+        <label style="display: block; font-size: 0.9rem; margin-bottom: 0.5rem;">Mouse & Touchpad Sensitivity</label>
+        <input type="range" id="sensitivity-slider" min="1" max="10" value="5" style="width: 100%;">
+      </div>
 
-        /* Handle Hazard Click */
-        function handleHazardSelect(id) {
-            if (!state.started) return;
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button id="btn-pause-resume" class="btn btn-primary btn-lg">
+          Resume Simulation
+        </button>
+        <button id="btn-pause-quit" class="btn btn-secondary">
+          Quit Scenario to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
 
-            const isNew = !state.foundHazards.has(id);
-            state.foundHazards.add(id);
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
 
-            // Play Chime
-            playSound('found');
-
-            // Update 3D Visual State in Scene
-            solveHazardIn3D(id);
-
-            // Update Score HUD
-            document.getElementById('score-text').innerText = `${state.foundHazards.size} / ${state.totalHazards}`;
-
-            // Show Informational Modal
-            const data = hazardsData[id];
-            document.getElementById('hazard-category-badge').innerText = data.category;
-            document.getElementById('hazard-category-badge').className = `px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${data.categoryClass}`;
-            document.getElementById('hazard-step-text').innerText = `${state.foundHazards.size} / ${state.totalHazards} Identifié${state.foundHazards.size > 1 ? 's' : ''}`;
-            document.getElementById('hazard-title').innerText = data.title;
-            document.getElementById('hazard-description').innerText = data.description;
-            document.getElementById('hazard-regulation').innerText = data.regulation;
-            document.getElementById('hazard-prevention').innerText = data.prevention;
-
-            document.getElementById('modal-hazard').classList.remove('hidden');
-        }
-
-        /* Modify 3D Entities to show "Resolved" status */
-        function solveHazardIn3D(id) {
-            const halo = document.getElementById(`halo-${id}`);
-            const label = document.getElementById(`label-${id}`);
-
-            if (halo) {
-                halo.setAttribute('color', '#22c55e'); // Green color
-            }
-
-            if (label) {
-                label.setAttribute('color', '#4ade80');
-                label.setAttribute('value', 'RISQUE IDENTIFIE & CORRIGE');
-            }
-
-            // Visual adaptations per object
-            if (id === 1) { // Chemical drum
-                const drum = document.getElementById('drum-mesh');
-                drum.setAttribute('color', '#15803d'); // Safe Green
-            } else if (id === 2) { // Exit
-                const crates = document.getElementById('blocking-crates');
-                crates.setAttribute('position', '2 0 0.6'); // Move out of the way
-            } else if (id === 3) { // Electric cable
-                const spark = document.getElementById('spark-mesh');
-                spark.setAttribute('color', '#22c55e');
-            } else if (id === 4) { // Oil
-                const oil = document.getElementById('oil-mesh');
-                oil.setAttribute('color', '#15803d');
-            } else if (id === 5) { // Grinder
-                const wheel = document.getElementById('grinder-wheel');
-                wheel.setAttribute('color', '#15803d');
-            }
-        }
-
-        /* Close Hazard Modal */
-        function closeHazardModal() {
-            playSound('click');
-            document.getElementById('modal-hazard').classList.add('hidden');
-
-            // Check for Victory
-            if (state.foundHazards.size === state.totalHazards) {
-                setTimeout(triggerVictory, 400);
-            }
-        }
-
-        /* Trigger Victory Modal */
-        function triggerVictory() {
-            clearInterval(state.timerInterval);
-            playSound('victory');
-            document.getElementById('modal-victory').classList.remove('hidden');
-        }
-
-        /* Sound Toggle Function */
-        function toggleAudio() {
-            state.audioEnabled = !state.audioEnabled;
-            const icon = document.getElementById('sound-icon');
-            if (state.audioEnabled) {
-                icon.className = 'fa-solid fa-volume-high text-teal-400';
-            } else {
-                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
-            }
-        }
-
-        /* Show/Hide Help Modals */
-        function showHelpModal() {
-            playSound('click');
-            document.getElementById('modal-help').classList.remove('hidden');
-        }
-
-        function closeHelpModal() {
-            playSound('click');
-            document.getElementById('modal-help').classList.add('hidden');
-        }
-
-        /* Reset Simulation */
-        function resetSimulation() {
-            playSound('click');
-            state.foundHazards.clear();
-            clearInterval(state.timerInterval);
-            state.startTime = Date.now();
-            
-            document.getElementById('score-text').innerText = `0 / ${state.totalHazards}`;
-            document.getElementById('timer-text').innerText = '00:00';
-            
-            document.getElementById('modal-victory').classList.add('hidden');
-            document.getElementById('modal-hazard').classList.add('hidden');
-            document.getElementById('modal-welcome').classList.remove('hidden');
-
-            // Reset 3D Hazard Visuals
-            for (let i = 1; i <= 5; i++) {
-                const halo = document.getElementById(`halo-${i}`);
-                const label = document.getElementById(`label-${i}`);
-                if (halo) halo.setAttribute('color', '#f59e0b');
-                if (label) label.setAttribute('color', '#fbbf24');
-            }
-
-            document.getElementById('label-1').setAttribute('value', 'PRODUIT SANS ETIQUETTE');
-            document.getElementById('drum-mesh').setAttribute('color', '#ea580c');
-
-            document.getElementById('label-2').setAttribute('value', 'SORTIE BLOQUEE');
-            document.getElementById('blocking-crates').setAttribute('position', '0 0 0.6');
-
-            document.getElementById('label-3').setAttribute('value', 'CABLE ELECTRIQUE NUDE');
-            document.getElementById('spark-mesh').setAttribute('color', '#ef4444');
-
-            document.getElementById('label-4').setAttribute('value', 'FLAQUE D\'HUILE GLISSANTE');
-            document.getElementById('oil-mesh').setAttribute('color', '#020617');
-
-            document.getElementById('label-5').setAttribute('value', 'MEULEUSE SANS PROTECTION');
-            document.getElementById('grinder-wheel').setAttribute('color', '#ef4444');
-
-            // Reset Camera Position
-            const rig = document.getElementById('rig');
-            rig.setAttribute('position', '0 0 7');
-        }
-    </script>
+  <!-- MODULE SCRIPTS -->
+  <script src="js/warehouse-scene.js"></script>
+  <script src="js/scenario-builder.js"></script>
+  <script src="js/player-controls.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
